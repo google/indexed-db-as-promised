@@ -1,0 +1,37 @@
+{
+  "name": "indexed-db-as-promised",
+  "author": "Justin Ridgewell",
+  "version": "0.1.0",
+  "description": "IndexedDB with Promise-likes",
+  "main": "lib/indexed-db.js",
+  "keywords": [
+    "indexed",
+    "db",
+    "promise"
+  ],
+  "scripts": {
+    "test": "mocha --compilers js:babel-core/register --recursive",
+    "test-cov": "babel-node isparta cover --report html --report text node_modules/.bin/_mocha",
+    "build": "babel src --out-dir lib",
+    "clean": "rm -rf lib",
+    "lint": "eslint src test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-cli": "^6.10.1",
+    "babel-core": "^6.10.1",
+    "babel-eslint": "^6.1.1",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-es2015-loose": "^7.0.0",
+    "chai": "^3.4.1",
+    "chai-as-promised": "^5.3.0",
+    "eslint": "^3.0.0",
+    "eslint-config-airbnb-base": "^4.0.0",
+    "eslint-plugin-import": "^1.10.2",
+    "fake-indexeddb": "^1.0.6",
+    "isparta": "^4.0.0",
+    "mocha": "^2.3.4"
+  },
+  "repository": "https://github.com/jridgewell/indexed-db-as-promised",
+  "license": "MIT"
+}
