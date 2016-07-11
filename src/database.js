@@ -26,7 +26,7 @@ export default class Database {
     const store = this.database.createObjectStore(name, params);
     return new ObjectStore(
       store,
-      new Transaction(store.transaction, this, /* TODO Params */{})
+      new Transaction(store.transaction, this)
     );
   }
 
@@ -34,11 +34,10 @@ export default class Database {
     this.database.deleteObjectStore(name);
   }
 
-  transaction(scope, mode = 'readonly', params = {}) {
+  transaction(scope, mode = 'readonly') {
     return new Transaction(
       this.database.transaction(scope, mode),
-      this,
-      params
+      this
     );
   }
 }

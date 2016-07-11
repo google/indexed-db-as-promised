@@ -75,13 +75,17 @@ describe('Transaction', () => {
   describe('#abort', () => {
     it('rolls back any changes', () => {
       let called = false;
-      return db.transaction('test', 'readwrite').run((tx) => {
+      db.transaction('test', 'readwrite').run((tx) => {
         const store = tx.objectStore('test');
         store.add({}).then(() => {
           tx.abort();
           called = true;
         });
-      }).catch(() => {
+      });
+
+      return new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      }).then(() => {
         return db.transaction('test').run((tx) => {
           const store = tx.objectStore('test');
           return store.count();
@@ -92,24 +96,25 @@ describe('Transaction', () => {
       });
     });
 
-    it('may optionally be recovered', () => {
-      let called = false;
-      return db.transaction('test', 'readwrite', {
-        aborted() { },
-      }).run((tx) => {
+    it('does not resolve the transaction promise', () => {
+      let fulfilled = false;
+      let rejected = false;
+      db.transaction('test', 'readwrite').run((tx) => {
         const store = tx.objectStore('test');
         store.add({}).then(() => {
           tx.abort();
-          called = true;
         });
       }).then(() => {
-        return db.transaction('test').run((tx) => {
-          const store = tx.objectStore('test');
-          return store.count();
-        });
-      }).then((count) => {
-        expect(called).to.be.true();
-        expect(count).to.equal(0);
+        fufilled = true;
+      }, () => {
+        rejected = true;
+      });
+
+      return new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      }).then(() => {
+        expect(fulfilled).to.be.false();
+        expect(rejected).to.be.false();
       });
     });
   });
@@ -123,8 +128,8 @@ describe('Transaction', () => {
     });
   });
 
-  describe('#then', () => {
-    it('returns the result of then', () => {
+  describe('#run', () => {
+    it('returns the result resolved result', () => {
       return db.transaction('test').run(() => {
         return 1;
       }).then((result) => {
@@ -150,54 +155,6 @@ describe('Transaction', () => {
             expect(item).to.equal('test');
           });
         });
-      });
-    });
-
-    describe('when handling an abort', () => {
-      it('returns the result of aborted', () => {
-        return db.transaction('test', 'readwrite', {
-          aborted() {
-            return 1;
-          },
-        }).run((tx) => {
-          tx.abort();
-        }).then((result) => {
-          expect(result).to.equal(1);
-        });
-      });
-
-      it('resolves after abort completes', () => {
-        let complete = false;
-        return db.transaction('test', 'readwrite', {
-          aborted() {
-            return db.transaction('test').run((tx) => {
-              tx.objectStore('test').count().then(() => {
-                complete = true;
-              });
-            });
-          },
-        }).run((tx) => {
-          tx.abort();
-        }).then(() => {
-          expect(complete).to.be.true();
-        });
-      });
-    });
-  });
-
-  describe('#catch', () => {
-    it('waits until transaction is complete', () => {
-      let complete = false;
-      return db.transaction('test', 'readwrite').run((tx) => {
-        let sync = true;
-        tx.objectStore('test').add('test', 'test').then(() => {
-          tx.abort();
-          expect(sync).to.be.false();
-          complete = true;
-        });
-        sync = false;
-      }).catch(() => {
-        expect(complete).to.be.true();
       });
     });
   });

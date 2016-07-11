@@ -3,17 +3,13 @@ import SyncPromise from './sync-promise';
 import { recoverWith, rejectWithError } from './util';
 
 export default class Transaction {
-  constructor(transaction, db, { aborted }) {
+  constructor(transaction, db) {
     this.transaction = transaction;
     this.db = db;
-    this.sentinel = {};
 
     this.promise = new SyncPromise((resolve, reject) => {
-      transaction.oncomplete = () => resolve(this.sentinel);
+      transaction.oncomplete = resolve;
       transaction.onerror = rejectWithError(reject);
-      transaction.onabort = aborted ?
-        recoverWith(resolve, aborted) :
-        rejectWithError(reject);
     });
   }
 
@@ -23,6 +19,14 @@ export default class Transaction {
 
   get objectStoreNames() {
     return this.transaction.objectStoreNames;
+  }
+
+  get onabort() {
+    return this.transaction.onabort;
+  }
+
+  set onabort(handler) {
+    this.transaction.onabort = handler;
   }
 
   abort() {
@@ -38,7 +42,7 @@ export default class Transaction {
       resolve(callback(this));
     }).then((result) => {
       return this.promise.then((completion) => {
-        return completion === this.sentinel ? result : completion;
+        return result;
       });
     }, (error) => {
       this.abort();
