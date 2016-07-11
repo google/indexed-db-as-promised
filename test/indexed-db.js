@@ -52,7 +52,7 @@ describe('IndexedDB', () => {
         });
       });
 
-      it('passes event', () => {
+      it('passes event data', () => {
         let resolve;
         const upgrade = new Promise((r) => {
           resolve = r;
@@ -67,6 +67,23 @@ describe('IndexedDB', () => {
         return upgrade.then((event) => {
           expect(event.oldVersion).to.equal(0);
           expect(event.newVersion).to.equal(1);
+        });
+      });
+
+      it('passes upgrade transaction instance', () => {
+        let resolve;
+        const upgrade = new Promise((r) => {
+          resolve = r;
+        });
+
+        iDb.open('test', 1, {
+          upgrade(db, event) {
+            resolve(event);
+          },
+        });
+
+        return upgrade.then((event) => {
+          expect(event.transaction.mode).to.equal('versionchange');
         });
       });
     });
@@ -89,7 +106,7 @@ describe('IndexedDB', () => {
         });
       });
 
-      it('passes event', () => {
+      it('passes event data', () => {
         return iDb.open('test', 1).then((db) => {
           let resolve;
           const blocked = new Promise((r) => {
@@ -102,6 +119,25 @@ describe('IndexedDB', () => {
           return blocked.then((event) => {
             expect(event.oldVersion).to.equal(1);
             expect(event.newVersion).to.equal(2);
+
+            // Cleanup
+            db.close();
+          });
+        });
+      });
+
+      it('passes no transaction', () => {
+        return iDb.open('test', 1).then((db) => {
+          let resolve;
+          const blocked = new Promise((r) => {
+            resolve = r;
+          });
+
+          iDb.open('test', 2, {
+            blocked: resolve,
+          });
+          return blocked.then((event) => {
+            expect(event.transaction).to.be.null();
 
             // Cleanup
             db.close();

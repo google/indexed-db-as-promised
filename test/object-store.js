@@ -62,24 +62,16 @@ describe('ObjectStore', () => {
   describe('#transaction', () => {
     it('returns the transaction associated with the objectStore', () => {
       return test((store, tx) => {
-        // A failure in our Mock IndexedDB lib.
-        tx.transaction.objectStoreNames = tx.transaction.db.objectStoreNames;
-
-        expect(store.transaction.objectStoreNames).to.deep.equal(['test']);
+        expect(store.transaction).to.equal(tx);
       });
     });
 
-    it('has a transaction during upgrade events', () => {
+    xit('has a transaction during upgrade events', () => {
       db.close();
       return iDb.open('test', 2, {
-        upgrade(db) {
+        upgrade(db, { transaction }) {
           const store = db.createObjectStore('test2');
-          const tx = store.transaction;
-
-          // A failure in our Mock IndexedDB lib.
-          tx.transaction.objectStoreNames = tx.transaction.db.objectStoreNames;
-
-          expect(tx.objectStoreNames).to.deep.equal(['test', 'test2']);
+          expect(store.transaction).to.equal(transaction);
         },
       });
     });
