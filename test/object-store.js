@@ -21,7 +21,7 @@ describe('ObjectStore', () => {
       cb = mode;
       mode = 'readwrite';
     }
-    return db.transaction(['test'], mode).then((tx) => {
+    return db.transaction(['test'], mode).run((tx) => {
       const store = tx.objectStore('test');
       return cb(store, tx);
     });

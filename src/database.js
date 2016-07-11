@@ -1,5 +1,5 @@
 import ObjectStore from './object-store';
-import TransactionRequest, { Transaction } from './transaction';
+import Transaction from './transaction';
 
 export default class Database {
   constructor(database) {
@@ -26,8 +26,7 @@ export default class Database {
     const store = this.database.createObjectStore(name, params);
     return new ObjectStore(
       store,
-      new Transaction(store.transaction, this)// ,
-      // TODO params
+      new Transaction(store.transaction, this, /* TODO Params */{})
     );
   }
 
@@ -36,7 +35,7 @@ export default class Database {
   }
 
   transaction(scope, mode = 'readonly', params = {}) {
-    return new TransactionRequest(
+    return new Transaction(
       this.database.transaction(scope, mode),
       this,
       params

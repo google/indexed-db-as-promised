@@ -20,7 +20,7 @@ describe('Transaction', () => {
     });
 
     it('returns the datbase', () => {
-      return db.transaction('test').then((tx) => {
+      return db.transaction('test').run((tx) => {
         expect(tx.db).to.equal(db);
       });
     });
@@ -32,13 +32,13 @@ describe('Transaction', () => {
     });
 
     it('defaults to readonly', () => {
-      return db.transaction('test').then((tx) => {
+      return db.transaction('test').run((tx) => {
         expect(tx.mode).to.equal('readonly');
       });
     });
 
     it('returns readwrite when transaction can write', () => {
-      return db.transaction('test', 'readwrite').then((tx) => {
+      return db.transaction('test', 'readwrite').run((tx) => {
         expect(tx.mode).to.equal('readwrite');
       });
     });
@@ -47,7 +47,7 @@ describe('Transaction', () => {
   xdescribe('#objectStoreNames', () => {
     describe('when scope is a string', () => {
       it('returns the objectStore name in scope', () => {
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           expect(tx.objectStoreNames).to.deep.equal(['test']);
         });
       });
@@ -56,7 +56,7 @@ describe('Transaction', () => {
     describe('when scope is an array', () => {
       describe('when the scope has only one item', () => {
         it('returns the objectStore name in scope', () => {
-          return db.transaction(['test']).then((tx) => {
+          return db.transaction(['test']).run((tx) => {
             expect(tx.objectStoreNames).to.deep.equal(['test']);
           });
         });
@@ -64,7 +64,7 @@ describe('Transaction', () => {
 
       describe('when the scope has multiple items', () => {
         it('returns the objectStore name in scope', () => {
-          return db.transaction(['test', 'test2']).then((tx) => {
+          return db.transaction(['test', 'test2']).run((tx) => {
             expect(tx.objectStoreNames).to.deep.equal(['test', 'test2']);
           });
         });
@@ -75,14 +75,14 @@ describe('Transaction', () => {
   describe('#abort', () => {
     it('rolls back any changes', () => {
       let called = false;
-      return db.transaction('test', 'readwrite').then((tx) => {
+      return db.transaction('test', 'readwrite').run((tx) => {
         const store = tx.objectStore('test');
         store.add({}).then(() => {
           tx.abort();
           called = true;
         });
       }).catch(() => {
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           const store = tx.objectStore('test');
           return store.count();
         });
@@ -96,14 +96,14 @@ describe('Transaction', () => {
       let called = false;
       return db.transaction('test', 'readwrite', {
         aborted() { },
-      }).then((tx) => {
+      }).run((tx) => {
         const store = tx.objectStore('test');
         store.add({}).then(() => {
           tx.abort();
           called = true;
         });
       }).then(() => {
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           const store = tx.objectStore('test');
           return store.count();
         });
@@ -116,7 +116,7 @@ describe('Transaction', () => {
 
   describe('#objectStore', () => {
     it('returns the objectStore', () => {
-      return db.transaction('test', 'readwrite').then((tx) => {
+      return db.transaction('test', 'readwrite').run((tx) => {
         const store = tx.objectStore('test');
         expect(store.name).to.equal('test');
       });
@@ -125,7 +125,7 @@ describe('Transaction', () => {
 
   describe('#then', () => {
     it('returns the result of then', () => {
-      return db.transaction('test').then(() => {
+      return db.transaction('test').run(() => {
         return 1;
       }).then((result) => {
         expect(result).to.equal(1);
@@ -134,7 +134,7 @@ describe('Transaction', () => {
 
     it('resolves after transaction completes', () => {
       let complete = false;
-      return db.transaction('test', 'readwrite').then((tx) => {
+      return db.transaction('test', 'readwrite').run((tx) => {
         let sync = true;
         tx.objectStore('test').add('test', 'test').then(() => {
           expect(sync).to.be.false();
@@ -145,7 +145,7 @@ describe('Transaction', () => {
       }).then((result) => {
         expect(result).to.equal(1);
         expect(complete).to.be.true();
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           return tx.objectStore('test').get('test').then((item) => {
             expect(item).to.equal('test');
           });
@@ -159,7 +159,7 @@ describe('Transaction', () => {
           aborted() {
             return 1;
           },
-        }).then((tx) => {
+        }).run((tx) => {
           tx.abort();
         }).then((result) => {
           expect(result).to.equal(1);
@@ -170,13 +170,13 @@ describe('Transaction', () => {
         let complete = false;
         return db.transaction('test', 'readwrite', {
           aborted() {
-            return db.transaction('test').then((tx) => {
+            return db.transaction('test').run((tx) => {
               tx.objectStore('test').count().then(() => {
                 complete = true;
               });
             });
           },
-        }).then((tx) => {
+        }).run((tx) => {
           tx.abort();
         }).then(() => {
           expect(complete).to.be.true();
@@ -188,7 +188,7 @@ describe('Transaction', () => {
   describe('#catch', () => {
     it('waits until transaction is complete', () => {
       let complete = false;
-      return db.transaction('test', 'readwrite').then((tx) => {
+      return db.transaction('test', 'readwrite').run((tx) => {
         let sync = true;
         tx.objectStore('test').add('test', 'test').then(() => {
           tx.abort();

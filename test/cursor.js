@@ -48,7 +48,7 @@ describe('Cursor', () => {
   }
 
   function test(cb) {
-    return db.transaction(['test'], 'readwrite').then((tx) => {
+    return db.transaction(['test'], 'readwrite').run((tx) => {
       const store = tx.objectStore('test');
       return cb(store);
     });
@@ -67,7 +67,7 @@ describe('Cursor', () => {
       cb = index;
       index = false;
     }
-    return db.transaction(['test'], 'readwrite').then((tx) => {
+    return db.transaction(['test'], 'readwrite').run((tx) => {
       const store = tx.objectStore('test');
       const source = index ? store.index('name') : store;
       const request = source.openCursor(null, direction);
@@ -185,7 +185,7 @@ describe('Cursor', () => {
       return propertyTest((cursor) => {
         cursor.update({ i: cursor.value.i, name: 'test' });
       }).then(() => {
-        return db.transaction(['test'], 'readonly').then((tx) => {
+        return db.transaction(['test'], 'readonly').run((tx) => {
           const store = tx.objectStore('test');
           return store.get(1);
         });
@@ -210,7 +210,7 @@ describe('Cursor', () => {
       return propertyTest((cursor) => {
         cursor.delete();
       }).then(() => {
-        return db.transaction(['test'], 'readonly').then((tx) => {
+        return db.transaction(['test'], 'readonly').run((tx) => {
           const store = tx.objectStore('test');
           return store.get(1);
         });

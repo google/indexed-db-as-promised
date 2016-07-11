@@ -91,7 +91,7 @@ describe('Database', () => {
 
   describe('#transaction', () => {
     it('opens up a new transaction', () => {
-      return db.transaction('test').then((tx) => {
+      return db.transaction('test').run((tx) => {
         return tx.objectStore('test').count();
       });
     });

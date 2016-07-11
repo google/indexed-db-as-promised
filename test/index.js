@@ -17,7 +17,7 @@ describe('Index', () => {
   });
 
   function test(cb) {
-    return db.transaction(['test'], 'readwrite').then((tx) => {
+    return db.transaction(['test'], 'readwrite').run((tx) => {
       const store = tx.objectStore('test');
       const index = store.index('name');
       return cb(index, store, tx);

@@ -23,7 +23,7 @@ describe('Request', () => {
 
     describe('when objectStore creates the request', () => {
       it('returns the objectStore', () => {
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           const store = tx.objectStore('test');
           expect(store.count().source).to.equal(store);
         });
@@ -32,7 +32,7 @@ describe('Request', () => {
 
     describe('when cursor creates the request', () => {
       it('returns the cursor', () => {
-        return db.transaction('test', 'readwrite').then((tx) => {
+        return db.transaction('test', 'readwrite').run((tx) => {
           const store = tx.objectStore('test');
           return store.add({}).then(() => {
             const cursorRequest = store.openCursor();
@@ -47,7 +47,7 @@ describe('Request', () => {
 
     describe('when index creates the request', () => {
       it('returns the index', () => {
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           const index = tx.objectStore('test').index('name');
           expect(index.count().source).to.equal(index);
         });
@@ -58,7 +58,7 @@ describe('Request', () => {
   describe('#readyState', () => {
     describe('when request is pending', () => {
       it('returns pending', () => {
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           const store = tx.objectStore('test');
           expect(store.count().readyState).to.equal('pending');
         });
@@ -67,7 +67,7 @@ describe('Request', () => {
 
     describe('when request is complete', () => {
       it('returns done', () => {
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           const store = tx.objectStore('test');
           const request = store.count();
           return request.then(() => {
@@ -89,7 +89,7 @@ describe('Request', () => {
 
     describe('when objectStore creates the request', () => {
       it('returns the transaction', () => {
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           const store = tx.objectStore('test');
           expect(store.count().transaction).to.equal(tx);
         });
@@ -98,7 +98,7 @@ describe('Request', () => {
 
     describe('when cursor creates the request', () => {
       it('returns the cursor', () => {
-        return db.transaction('test', 'readwrite').then((tx) => {
+        return db.transaction('test', 'readwrite').run((tx) => {
           const store = tx.objectStore('test');
           return store.add({}).then(() => {
             const cursorRequest = store.openCursor();
@@ -113,7 +113,7 @@ describe('Request', () => {
 
     describe('when index creates the request', () => {
       it('returns the index', () => {
-        return db.transaction('test').then((tx) => {
+        return db.transaction('test').run((tx) => {
           const index = tx.objectStore('test').index('name');
           expect(index.count().transaction).to.equal(tx);
         });
@@ -121,9 +121,9 @@ describe('Request', () => {
     });
   });
 
-  describe('#then', () => {
+  describe('#run', () => {
     it('waits until request is complete', () => {
-      return db.transaction('test').then((tx) => {
+      return db.transaction('test').run((tx) => {
         const store = tx.objectStore('test');
         let sync = true;
         const p = store.count().then(() => {
@@ -131,26 +131,6 @@ describe('Request', () => {
         });
         sync = false;
         return p;
-      });
-    });
-  });
-
-  describe('#catch', () => {
-    it('waits until request is complete', () => {
-      let called = false;
-      return db.transaction('test', 'readwrite').then((tx) => {
-        const store = tx.objectStore('test');
-        return store.add({}, 'test').then(() => {
-          let sync = true;
-          const p = store.add({}, 'test').catch(() => {
-            expect(sync).to.be.false();
-            called = true;
-          });
-          sync = false;
-          return p;
-        });
-      }).catch(() => {
-        expect(called).to.be.true();
       });
     });
   });
