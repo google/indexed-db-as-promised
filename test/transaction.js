@@ -157,5 +157,20 @@ describe('Transaction', () => {
         });
       });
     });
+
+    it('throws if run multiple times', () => {
+      const transaction = db.transaction('test', 'readwrite');
+      return transaction.run(() => {}).then(() => {
+        expect(() => {
+          transaction.run(() => {});
+        }).to.throw(Error);
+      });
+    });
+
+    it('rejects if transaction is returned', () => {
+      return expect(db.transaction('test', 'readwrite').run((tx) => {
+        return tx;
+      })).to.eventually.be.rejectedWith(Error);
+    });
   });
 });

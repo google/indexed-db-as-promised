@@ -6,6 +6,7 @@ export default class Transaction {
   constructor(transaction, db) {
     this.transaction = transaction;
     this.db = db;
+    this.ran = false;
 
     this.promise = new SyncPromise((resolve, reject) => {
       transaction.oncomplete = resolve;
@@ -38,9 +39,17 @@ export default class Transaction {
   }
 
   run(callback) {
+    if (this.ran) {
+      throw new Error('Transaction has already run.');
+    }
+
+    this.ran = true;
     return new SyncPromise((resolve) => {
       resolve(callback(this));
     }).then((result) => {
+      if (result === this) {
+        throw new Error('Cannot access the transaction instance outside the run block.');
+      }
       return this.promise.then((completion) => {
         return result;
       });
