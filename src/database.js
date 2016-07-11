@@ -18,6 +18,38 @@ export default class Database {
     return this.database.version;
   }
 
+  get onabort() {
+    return this.database.onabort;
+  }
+
+  set onabort(handler) {
+    this.database.onabort = handler;
+  }
+
+  get onclose() {
+    return this.database.onclose;
+  }
+
+  set onclose(handler) {
+    this.database.onclose = handler;
+  }
+
+  get onerror() {
+    return this.database.onerror;
+  }
+
+  set onerror(handler) {
+    this.database.onerror = handler;
+  }
+
+  get onversionchange() {
+    return this.database.onversionchange;
+  }
+
+  set onversionchange(handler) {
+    this.database.onversionchange = handler;
+  }
+
   close() {
     this.database.close();
   }
