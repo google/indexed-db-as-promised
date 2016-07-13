@@ -16,6 +16,10 @@
     "no-use-before-define": [2, {
       "functions": false
     }],
+    "prefer-arrow-callback": [1, {
+      "allowNamedFunctions": false,
+      "allowUnboundThis": true,
+    }],
     'space-before-function-paren': [2, "never"],
     "arrow-body-style": 0,
     "no-param-reassign": 0,
