@@ -1,12 +1,12 @@
 import SyncPromise from './sync-promise';
-import { resolveWithResult, rejectWithError } from './util';
+import { resolveWithResult, rejectWithError } from '../util';
 
 export default class Request {
   constructor(request, transaction = null, source = null) {
-    this.request = request;
+    this.request_ = request;
     this.transaction = transaction;
     this.source = source;
-    this.promise = new SyncPromise((resolve, reject) => {
+    this.promise_ = new SyncPromise((resolve, reject) => {
       if (request.readyState === 'done') {
         if (request.error) {
           reject(request.error);
@@ -21,7 +21,7 @@ export default class Request {
   }
 
   get readyState() {
-    return this.request.readyState;
+    return this.request_.readyState;
   }
 
   catch(onRejected) {
@@ -29,6 +29,6 @@ export default class Request {
   }
 
   then(onFulfilled, onRejected) {
-    return this.promise.then(onFulfilled, onRejected);
+    return this.promise_.then(onFulfilled, onRejected);
   }
 }

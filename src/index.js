@@ -1,54 +1,44 @@
-import Request from './request';
-import CursorRequest from './cursor';
+import Request from './classes/request';
+import Database from './classes/database';
+import Transaction from './classes/transaction';
+import SyncPromise from './classes/sync-promise';
 
-export default class Index {
-  constructor(index, transaction, objectStore) {
-    this.index = index;
-    this.transaction = transaction;
-    this.objectStore = objectStore;
-  }
+const iDb = {
+  deleteDatabase(name) {
+    return SyncPromise.resolve(new Request(indexedDB.deleteDatabase(name)));
+  },
 
-  get keyPath() {
-    return this.index.keyPath;
-  }
+  open(name, version = 1, { upgrade, blocked } = {}) {
+    let db;
+    const request = indexedDB.open(name, version);
+    function instance() {
+      return db || (db = new Database(request.result));
+    }
+    function versionChangeEvent(event) {
+      const transaction = request.transaction;
+      return {
+        oldVersion: event.oldVersion,
+        newVersion: event.newVersion,
+        transaction: transaction && new Transaction(transaction, db),
+      };
+    }
 
-  get multiEntry() {
-    return this.index.multiEntry;
-  }
+    if (upgrade) {
+      request.onupgradeneeded = (event) => {
+        upgrade(instance(), versionChangeEvent(event));
+      };
+    }
+    if (blocked) {
+      request.onblocked = (event) => {
+        blocked(versionChangeEvent(event));
+      };
+    }
 
-  get name() {
-    return this.index.name;
-  }
+    return SyncPromise.resolve(new Request(request).then(instance));
+  },
+};
 
-  get unique() {
-    return this.index.unique;
-  }
-
-  count(query = null) {
-    return new Request(
-      query == null ? this.index.count() : this.index.count(query),
-      this.transaction,
-      this
-    );
-  }
-
-  get(key) {
-    return new Request(this.index.get(key), this.transaction, this);
-  }
-
-  getAll(query = null, count = Infinity) {
-    return new Request(this.index.getAll(query, count), this.transaction, this);
-  }
-
-  getAllKeys(query = null, count = Infinity) {
-    return new Request(this.index.getAllKeys(query, count), this.transaction, this);
-  }
-
-  openCursor(query = null, direction = 'next') {
-    return new CursorRequest(this.index.openCursor(query, direction), this.transaction, this);
-  }
-
-  openKeyCursor(query = null, direction = 'next') {
-    return new CursorRequest(this.index.openKeyCursor(query, direction), this.transaction, this);
-  }
-}
+export default iDb;
+export {
+  SyncPromise,
+};
