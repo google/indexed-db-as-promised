@@ -1,6 +1,6 @@
 import chai, { Assertion, util } from 'chai';
 import chaiPromised from 'chai-as-promised';
-import iDb from '../src/indexed-db';
+import iDb from '../src/index';
 import indexedDB from './mock/indexed-db';
 
 chai.use(chaiPromised);

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import iDb from '../src/indexed-db';
+import iDb from '../src/index';
 
 describe('Transaction', () => {
   let db;
@@ -105,7 +105,7 @@ describe('Transaction', () => {
           tx.abort();
         });
       }).then(() => {
-        fufilled = true;
+        fulfilled = true;
       }, () => {
         rejected = true;
       });

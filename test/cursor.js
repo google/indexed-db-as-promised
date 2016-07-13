@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import iDb from '../src/indexed-db';
+import iDb from '../src/index';
 
 describe('Cursor', () => {
   let db;
@@ -23,8 +23,8 @@ describe('Cursor', () => {
 
   // Our Mock library fails us.
   function fixPrimaryKey(request) {
-    const onsuccess = request.cursorRequest.onsuccess;
-    request.cursorRequest.onsuccess = function success(event) {
+    const onsuccess = request.cursorRequest_.onsuccess;
+    request.cursorRequest_.onsuccess = function success(event) {
       const result = event.target.result;
       if (result) {
         event.target.result = Object.create(result, {

@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import iDb from '../src/indexed-db';
+import iDb from '../src/index';
 
 describe('Index', () => {
   let db;
