@@ -78,7 +78,7 @@ describe('ObjectStore', () => {
   });
 
   describe('#add', () => {
-    it('adds an item to the objectStore', () => {
+    it('adds an record to the objectStore', () => {
       return test((store) => {
         return store.add({}).then(() => {
           return store.count();
@@ -88,7 +88,7 @@ describe('ObjectStore', () => {
       });
     });
 
-    it('returns the key used to store the item', () => {
+    it('returns the key used to store the record', () => {
       return test((store) => {
         return store.add({ name: 'test' });
       }).then((key) => {
@@ -129,7 +129,7 @@ describe('ObjectStore', () => {
       });
     });
 
-    it('removes all items from the objectStore', () => {
+    it('removes all records from the objectStore', () => {
       return test((store) => {
         return store.clear().then(() => {
           return store.count();
@@ -155,7 +155,7 @@ describe('ObjectStore', () => {
       });
     });
 
-    it('returns the item count', () => {
+    it('returns the record count', () => {
       return test((store) => {
         return store.count();
       }).then((count) => {
@@ -216,7 +216,7 @@ describe('ObjectStore', () => {
       });
     });
 
-    it('deletes the item', () => {
+    it('deletes the record', () => {
       return test((store) => {
         return store.delete(1).then(() => {
           return store.count();
@@ -278,11 +278,11 @@ describe('ObjectStore', () => {
       });
     });
 
-    it('gets the item', () => {
+    it('gets the record', () => {
       return test((store) => {
         return store.get(1);
-      }).then((item) => {
-        expect(item).to.equal('test');
+      }).then((record) => {
+        expect(record).to.equal('test');
       });
     });
 
@@ -303,7 +303,7 @@ describe('ObjectStore', () => {
       });
     });
 
-    it('gets all the item', () => {
+    it('gets all the record', () => {
       return test((store) => {
         return store.getAll();
       }).then((all) => {
@@ -354,7 +354,7 @@ describe('ObjectStore', () => {
       });
     });
 
-    it('gets all the item keys', () => {
+    it('gets all the record keys', () => {
       return test((store) => {
         return store.getAllKeys();
       }).then((all) => {

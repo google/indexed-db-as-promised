@@ -64,7 +64,7 @@ describe('Index', () => {
       });
     });
 
-    it('returns the item count', () => {
+    it('returns the record count', () => {
       return test((index) => {
         return index.count();
       }).then((count) => {
@@ -91,11 +91,11 @@ describe('Index', () => {
       });
     });
 
-    it('gets the item', () => {
+    it('gets the record', () => {
       return test((index) => {
         return index.get(1);
-      }).then((item) => {
-        expect(item).to.deep.equal({ name: 1 });
+      }).then((record) => {
+        expect(record).to.deep.equal({ name: 1 });
       });
     });
   });
@@ -108,7 +108,7 @@ describe('Index', () => {
       });
     });
 
-    it('gets all the item', () => {
+    it('gets all the record', () => {
       return test((index) => {
         return index.getAll();
       }).then((all) => {
@@ -159,7 +159,7 @@ describe('Index', () => {
       });
     });
 
-    it('gets all the item keys', () => {
+    it('gets all the record keys', () => {
       return test((index) => {
         return index.getAllKeys();
       }).then((all) => {

@@ -20,6 +20,11 @@
       "allowNamedFunctions": false,
       "allowUnboundThis": true,
     }],
+    'no-unused-vars': [2, {
+      "args": 'after-used',
+      "vars": 'local',
+      "varsIgnorePattern": "(VersionChangeEvent|OpenCallbacks)"
+    }],
     'space-before-function-paren': [2, "never"],
     "arrow-body-style": 0,
     "no-param-reassign": 0,

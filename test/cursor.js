@@ -166,7 +166,7 @@ describe('Cursor', () => {
   });
 
   describe('#value', () => {
-    it('returns the current item', () => {
+    it('returns the current record', () => {
       let calls = 0;
       return propertyTest((cursor) => {
         calls++;
@@ -181,7 +181,7 @@ describe('Cursor', () => {
   });
 
   describe('#update', () => {
-    it('updates the current item', () => {
+    it('updates the current record', () => {
       return propertyTest((cursor) => {
         cursor.update({ i: cursor.value.i, name: 'test' });
       }).then(() => {
@@ -206,7 +206,7 @@ describe('Cursor', () => {
   });
 
   describe('#delete', () => {
-    it('deletes the current item', () => {
+    it('deletes the current record', () => {
       return propertyTest((cursor) => {
         cursor.delete();
       }).then(() => {
@@ -246,7 +246,7 @@ describe('Cursor', () => {
       });
     });
 
-    it('calls for every item', () => {
+    it('calls for every record', () => {
       let calls = 0;
       return test((store) => {
         return store.openCursor().iterate((cursor) => {
@@ -371,7 +371,7 @@ describe('Cursor', () => {
       });
     });
 
-    it('calls for every item', () => {
+    it('calls for every record', () => {
       let calls = 0;
       return test((store) => {
         return store.openCursor().while(() => {

@@ -28,7 +28,14 @@ describe('Transaction', () => {
 
   describe('#mode', () => {
     describe('during upgrade event', () => {
-      it('returns versionchange');
+      it('returns versionchange', () => {
+        db.close();
+        return iDb.open('test', 2, {
+          upgrade(db, { transaction }) {
+            expect(transaction.mode).to.equal('versionchange');
+          }
+        });
+      });
     });
 
     it('defaults to readonly', () => {
@@ -54,7 +61,7 @@ describe('Transaction', () => {
     });
 
     describe('when scope is an array', () => {
-      describe('when the scope has only one item', () => {
+      describe('when the scope has only one record', () => {
         it('returns the objectStore name in scope', () => {
           return db.transaction(['test']).run((tx) => {
             expect(tx.objectStoreNames).to.deep.equal(['test']);
@@ -62,7 +69,7 @@ describe('Transaction', () => {
         });
       });
 
-      describe('when the scope has multiple items', () => {
+      describe('when the scope has multiple records', () => {
         it('returns the objectStore name in scope', () => {
           return db.transaction(['test', 'test2']).run((tx) => {
             expect(tx.objectStoreNames).to.deep.equal(['test', 'test2']);
@@ -126,6 +133,25 @@ describe('Transaction', () => {
         expect(store.name).to.equal('test');
       });
     });
+
+    describe('during upgrade event', () => {
+      it('returns the objectStore', () => {
+        db.close();
+        return iDb.open('test', 2, {
+          upgrade(db, { transaction }) {
+            const store = transaction.objectStore('test');
+            expect(store.name).to.equal('test');
+          }
+        });
+      });
+    });
+
+    it('throws if outside the #run block', () => {
+      const tx = db.transaction('test', 'readwrite');
+      expect(() => {
+        tx.objectStore('test');
+      }).to.throw(Error);
+    });
   });
 
   describe('#run', () => {
@@ -151,8 +177,8 @@ describe('Transaction', () => {
         expect(result).to.equal(1);
         expect(complete).to.be.true();
         return db.transaction('test').run((tx) => {
-          return tx.objectStore('test').get('test').then((item) => {
-            expect(item).to.equal('test');
+          return tx.objectStore('test').get('test').then((record) => {
+            expect(record).to.equal('test');
           });
         });
       });
@@ -167,10 +193,15 @@ describe('Transaction', () => {
       });
     });
 
-    it('rejects if transaction is returned', () => {
-      return expect(db.transaction('test', 'readwrite').run((tx) => {
-        return tx;
-      })).to.eventually.be.rejectedWith(Error);
+    it('throw if run during versionchange', () => {
+      db.close();
+      return iDb.open('test', 2, {
+        upgrade(db, { transaction }) {
+          expect(() => {
+            transaction.run();
+          }).to.throw(Error);
+        }
+      });
     });
   });
 });
