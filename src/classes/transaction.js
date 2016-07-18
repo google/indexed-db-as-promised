@@ -7,8 +7,8 @@ import { rejectWithError } from '../util';
  */
 export default class Transaction {
   /**
-   * @param {!IDBTransaction}
-   * @param {!Database} The database that opened the transaction.
+   * @param {!IDBTransaction} transaction
+   * @param {!Database} db The database that opened the transaction.
    */
   constructor(transaction, db) {
     /** @const */

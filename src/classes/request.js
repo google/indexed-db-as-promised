@@ -71,7 +71,7 @@ export default class Request {
    * `onFulfilled` if this request succeedes, or `onRejected` if this request
    * fails.
    *
-   * @param {function(T):S} onRejected
+   * @param {function(T):S} onFulfilled
    * @param {function(T):R} onRejected
    * @return {SyncPromise<S>} A Promise-like
    * @template S

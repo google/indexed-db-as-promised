@@ -116,7 +116,7 @@ class Cursor {
    * Updates the record at the cursor's current position.
    *
    * @param {*} value
-   * @return {!Request<IDBKeyType}} A wrapped IDBRequest to update the current
+   * @return {!Request<IDBKeyType>} A wrapped IDBRequest to update the current
    *     record.
    */
   update(value) {
