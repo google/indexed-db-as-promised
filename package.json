@@ -42,5 +42,5 @@
     "vinyl-source-stream": "^1.1.0"
   },
   "repository": "https://github.com/jridgewell/indexed-db-as-promised",
-  "license": "MIT"
+  "license": "Apache-2.0"
 }

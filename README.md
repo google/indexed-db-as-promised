@@ -19,4 +19,4 @@ npm install --save indexed-db-as-promised
 
 ## License
 
-MIT
+Apache 2.0
