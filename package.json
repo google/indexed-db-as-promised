@@ -2,7 +2,7 @@
   "name": "indexed-db-as-promised",
   "author": "Justin Ridgewell",
   "version": "0.1.0",
-  "description": "IndexedDB with Promise-likes",
+  "description": "A thin Promise-like wrapper around IndexedDB",
   "main": "lib/index.js",
   "keywords": [
     "indexed",

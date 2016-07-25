@@ -7,6 +7,7 @@ returning Promise-likes. Inspired by ideas in
 but written with the `SyncPromise` library to avoid issues with the transaction
 lifetime.
 
+This is not an official Google product.
 
 ## Installation
 
