@@ -32,14 +32,9 @@ export default class SyncPromise {
   }
 
   then(onFulfilled, onRejected) {
-    onFulfilled = isFunction(onFulfilled) ? onFulfilled : void 0;
-    onRejected = isFunction(onRejected) ? onRejected : void 0;
-
-    return this.state_(
-      this.value_,
-      onFulfilled,
-      onRejected
-    );
+    onFulfilled = isFunction(onFulfilled) ? onFulfilled : returner;
+    onRejected = isFunction(onRejected) ? onRejected : thrower;
+    return this.state_(this.value_, onFulfilled, onRejected);
   }
 
   catch(onRejected) {
@@ -63,7 +58,7 @@ export default class SyncPromise {
       let length = promises.length;
       const values = new Array(length);
 
-      if (length === 0) {
+      if (length == 0) {
         resolve(values);
         return;
       }
@@ -71,7 +66,7 @@ export default class SyncPromise {
       each(promises, (promise, index) => {
         SyncPromise.resolve(promise).then((value) => {
           values[index] = value;
-          if (--length === 0) {
+          if (--length == 0) {
             resolve(values);
           }
         }, reject);
@@ -81,43 +76,34 @@ export default class SyncPromise {
 
   static race(promises) {
     return new SyncPromise((resolve, reject) => {
-      for (let i = 0, l = promises.length; i < l; i++) {
+      for (let i = 0; i < promises.length; i++) {
         SyncPromise.resolve(promises[i]).then(resolve, reject);
       }
     });
   }
 }
 
-function FulfilledPromise(value, onFulfilled, unused, deferred) {
-  if (!onFulfilled) { return this; }
-  if (!deferred) {
-    deferred = Deferred();
+function PromiseState(action) {
+  return function(value, onFulfilled, onRejected, deferred) {
+    if (!deferred) {
+      deferred = Deferred();
+    }
+    action(value, onFulfilled, onRejected, deferred);
+    return deferred.promise;
   }
+}
+
+const FulfilledPromise = PromiseState((value, onFulfilled, _, deferred) => {
   tryCatchDeferred(deferred, onFulfilled, value);
-  return deferred.promise;
-}
+});
 
-function RejectedPromise(reason, unused, onRejected, deferred) {
-  if (!onRejected) { return this; }
-  if (!deferred) {
-    deferred = Deferred();
-  }
+const RejectedPromise = PromiseState((reason, _, onRejected, deferred) => {
   tryCatchDeferred(deferred, onRejected, reason);
-  return deferred.promise;
-}
+});
 
-function PendingPromise(queue, onFulfilled, onRejected, deferred) {
-  if (!onFulfilled && !onRejected) { return this; }
-  if (!deferred) {
-    deferred = Deferred();
-  }
-  queue.push({
-    deferred,
-    onFulfilled: onFulfilled || deferred.resolve,
-    onRejected: onRejected || deferred.reject,
-  });
-  return deferred.promise;
-}
+const PendingPromise = PromiseState((queue, onFulfilled, onRejected, deferred) => {
+  queue.push({ deferred, onFulfilled, onRejected });
+});
 
 function Deferred() {
   const deferred = {};
@@ -135,7 +121,7 @@ function adopt(promise, state, value) {
 
   for (let i = 0; i < queue.length; i++) {
     const { onFulfilled, onRejected, deferred } = queue[i];
-    promise.state_(value, onFulfilled, onRejected, deferred);
+    state(value, onFulfilled, onRejected, deferred);
   }
 }
 
@@ -145,12 +131,20 @@ function adopter(promise, state) {
 
 function noop() {}
 
+function returner(x) {
+  return x;
+}
+
+function thrower(x) {
+  throw x;
+}
+
 function isFunction(fn) {
-  return typeof fn === 'function';
+  return typeof fn == 'function';
 }
 
 function isObject(obj) {
-  return obj === Object(obj);
+  return obj == Object(obj);
 }
 
 function each(collection, iterator) {
@@ -163,9 +157,6 @@ function tryCatchDeferred(deferred, fn, arg) {
   const { promise, resolve, reject } = deferred;
   try {
     const result = fn(arg);
-    if (resolve === fn || reject === fn) {
-      return;
-    }
     doResolve(promise, resolve, reject, result, result);
   } catch (e) {
     reject(e);
@@ -173,34 +164,31 @@ function tryCatchDeferred(deferred, fn, arg) {
 }
 
 function doResolve(promise, resolve, reject, value, context) {
-  let _reject = reject;
-  let then;
-  let _resolve;
+  let called = false;
   try {
-    if (value === promise) {
+    if (value == promise) {
       throw new TypeError('Cannot fulfill promise with itself');
     }
-    const isObj = isObject(value);
-    if (isObj && value instanceof SyncPromise) {
-      adopt(promise, value.state_, value.value_);
-    } else if (isObj && (then = value.then) && isFunction(then)) {
-      _resolve = (value) => {
-        _resolve = _reject = noop;
-        doResolve(promise, resolve, reject, value, value);
-      };
-      _reject = (reason) => {
-        _resolve = _reject = noop;
-        reject(reason);
-      };
-      then.call(
-        context,
-        (value) => _resolve(value),
-        (reason) => _reject(reason)
-      );
+    let then;
+    if (isObject(value) && (then = value.then) && isFunction(then)) {
+      then.call(context, (value) => {
+        if (!called) {
+          called = true;
+          doResolve(promise, resolve, reject, value, value);
+        }
+      }, (reason) => {
+        if (!called) {
+          called = true;
+          reject(reason);
+        }
+      });
     } else {
       resolve(value);
     }
-  } catch (e) {
-    _reject(e);
+  } catch (reason) {
+    if (!called) {
+      called = true;
+      reject(reason);
+    }
   }
 }
