@@ -34,6 +34,14 @@ export default class Transaction {
     this.db = db;
 
     /**
+     * The access mode the transaction runs in.
+     * @see https://www.w3.org/TR/IndexedDB/#idl-def-IDBTransactionMode
+     *
+     * @const {!IDBTransactionMode}
+     */
+    this.mode = transaction.mode;
+
+    /**
      * Whether this transaction has run. We limit the transaction to only
      * "running" once inside a `#run` callback to provide a clear indication
      * that transactions **will** close if there is no work currently being
@@ -45,7 +53,7 @@ export default class Transaction {
      * access to objectStores is allowed outside the `#run` block.
      * @type {boolean}
      */
-    this.ran_ = transaction.mode === 'versionchange';
+    this.ran_ = this.mode === 'versionchange';
 
     /**
      * A promise that will only resolve when the transaction has finished all
@@ -64,22 +72,12 @@ export default class Transaction {
   }
 
   /**
-   * The access mode the transaction runs in.
-   * @see https://www.w3.org/TR/IndexedDB/#idl-def-IDBTransactionMode
-   *
-   * @return {!IDBTransactionMode}
-   */
-  get mode() {
-    return this.transaction_.mode;
-  }
-
-  /**
    * The names of all the objectStores the transaction may access.
    *
    * @return {!DOMStringList}
    */
   get objectStoreNames() {
-    return this.transaction_.objectStoreNames;
+    return transaction.objectStoreNames;
   }
 
   /**
