@@ -55,9 +55,13 @@ function bundle(options) {
       babel({
         exclude: 'node_modules/**',
       }),
-      options.min ? uglify({
-        mangle: false,
-        compress: { keep_fargs: false },
+      options.minify ? uglify({
+        compress: {
+          keep_fargs: false,
+        },
+        mangleProperties: {
+          regex: /^_/,
+        }
       }) : {},
     ],
   }).pipe(source(options.output))

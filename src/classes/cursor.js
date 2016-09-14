@@ -50,7 +50,7 @@ class Cursor {
     this.source = source;
 
     /** @const */
-    this.cursor_ = cursor;
+    this._cursor = cursor;
 
     /**
      * The direction of iteration for this cursor.
@@ -88,7 +88,7 @@ class Cursor {
    * @param {number} count A number positive number to advance by.
    */
   advance(count) {
-    this.cursor_.advance(count);
+    this._cursor.advance(count);
   }
 
   /**
@@ -100,9 +100,9 @@ class Cursor {
    */
   continue(key = null) {
     if (key == null) {
-      this.cursor_.continue();
+      this._cursor.continue();
     } else {
-      this.cursor_.continue(key);
+      this._cursor.continue(key);
     }
   }
 
@@ -115,7 +115,7 @@ class Cursor {
    *     record.
    */
   delete() {
-    return new Request(this.cursor_.delete(), this.transaction, this);
+    return new Request(this._cursor.delete(), this.transaction, this);
   }
 
   /**
@@ -126,7 +126,7 @@ class Cursor {
    *     record.
    */
   update(value) {
-    return new Request(this.cursor_.update(value), this.transaction, this);
+    return new Request(this._cursor.update(value), this.transaction, this);
   }
 }
 
@@ -149,7 +149,7 @@ export default class CursorRequest {
     this.source = source;
 
     /** @const */
-    this.cursorRequest_ = cursorRequest;
+    this._cursorRequest = cursorRequest;
 
     /**
      * A promise which resolves to the cursor at the cursor's current position.
@@ -158,7 +158,7 @@ export default class CursorRequest {
      *
      * @type {!Request<IDBCursor>}
      */
-    this.promise_ = new Request(cursorRequest, this, source);
+    this._promise = new Request(cursorRequest, this, source);
   }
 
   /**
@@ -172,9 +172,9 @@ export default class CursorRequest {
    *     values returned from `iterator` at every iteration.
    */
   iterate(iterator) {
-    return this.promise_.then((result) => {
+    return this._promise.then((result) => {
       const results = [];
-      const request = this.cursorRequest_;
+      const request = this._cursorRequest;
 
       // Avoid the rest if the cursor is out of bounds.
       if (!result) {
@@ -213,7 +213,7 @@ export default class CursorRequest {
         // Update our request promise to reflect that we're waiting for the
         // cursor to advance.
         const next = new Request(request, this.transaction, this.source);
-        return (this.promise_ = next);
+        return (this._promise = next);
       };
 
       /**
@@ -273,7 +273,7 @@ export default class CursorRequest {
      * @return {*}
      */
     const autoAdvancer = (result) => {
-      if (this.cursorRequest_.readyState === 'done') {
+      if (this._cursorRequest.readyState === 'done') {
         if (result === false) {
           preempt = true;
         } else {

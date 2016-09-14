@@ -23,15 +23,15 @@ import CursorRequest from './cursor';
 export default class Index {
   /**
    * @param {!IDBIndex} index
-   * @param {!Transaction} transaction_ The transaction that opened this index
+   * @param {!Transaction} transaction The transaction that opened this index
    * @param {!ObjectStore} objectStore the ObjectStore this index belongs to.
    */
   constructor(index, transaction, objectStore) {
     /** @const */
-    this.index_ = index;
+    this._index = index;
 
     /** @const */
-    this.transaction_ = transaction;
+    this._transaction = transaction;
 
     /** @const */
     this.objectStore = objectStore;
@@ -72,8 +72,8 @@ export default class Index {
    */
   count(query = null) {
     return new Request(
-      query == null ? this.index_.count() : this.index_.count(query),
-      this.transaction_,
+      query == null ? this._index.count() : this._index.count(query),
+      this._transaction,
       this
     );
   }
@@ -87,7 +87,7 @@ export default class Index {
    * @return {!Request<*>}
    */
   get(key) {
-    return new Request(this.index_.get(key), this.transaction_, this);
+    return new Request(this._index.get(key), this._transaction, this);
   }
 
   /**
@@ -101,7 +101,7 @@ export default class Index {
    * @return {!Request<!Array<*>>}
    */
   getAll(query = null, count = Infinity) {
-    return new Request(this.index_.getAll(query, count), this.transaction_, this);
+    return new Request(this._index.getAll(query, count), this._transaction, this);
   }
 
   /**
@@ -114,7 +114,7 @@ export default class Index {
    * @return {!Request<!Array<*>>}
    */
   getAllKeys(query = null, count = Infinity) {
-    return new Request(this.index_.getAllKeys(query, count), this.transaction_, this);
+    return new Request(this._index.getAllKeys(query, count), this._transaction, this);
   }
 
   /**
@@ -125,7 +125,7 @@ export default class Index {
    * @return {!CursorRequest} A wrapper around an iterating IDBCursor.
    */
   openCursor(query = null, direction = 'next') {
-    return new CursorRequest(this.index_.openCursor(query, direction), this.transaction_, this);
+    return new CursorRequest(this._index.openCursor(query, direction), this._transaction, this);
   }
 
   /**
@@ -136,6 +136,6 @@ export default class Index {
    * @return {!CursorRequest} A wrapper around an iterating IDBCursor.
    */
   openKeyCursor(query = null, direction = 'next') {
-    return new CursorRequest(this.index_.openKeyCursor(query, direction), this.transaction_, this);
+    return new CursorRequest(this._index.openKeyCursor(query, direction), this._transaction, this);
   }
 }

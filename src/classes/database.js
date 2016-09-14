@@ -26,7 +26,7 @@ class BaseDatabase {
    */
   constructor(database) {
     /** @const */
-    this.database_ = database;
+    this._database = database;
 
     /** @const {string} */
     this.name = database.name;
@@ -49,7 +49,7 @@ class BaseDatabase {
    * @return {EventHandler}
    */
   get onabort() {
-    return this.database_.onabort;
+    return this._database.onabort;
   }
 
   /**
@@ -59,7 +59,7 @@ class BaseDatabase {
    * @param {EventHandler} handler
    */
   set onabort(handler) {
-    this.database_.onabort = handler;
+    this._database.onabort = handler;
   }
 
   /**
@@ -69,7 +69,7 @@ class BaseDatabase {
    * @return {EventHandler}
    */
   get onerror() {
-    return this.database_.onerror;
+    return this._database.onerror;
   }
 
   /**
@@ -79,7 +79,7 @@ class BaseDatabase {
    * @param {EventHandler} handler
    */
   set onerror(handler) {
-    this.database_.onerror = handler;
+    this._database.onerror = handler;
   }
 
   /**
@@ -90,7 +90,7 @@ class BaseDatabase {
    * @return {EventHandler}
    */
   get onversionchange() {
-    return this.database_.onversionchange;
+    return this._database.onversionchange;
   }
 
   /**
@@ -101,14 +101,14 @@ class BaseDatabase {
    * @param {EventHandler} handler
    */
   set onversionchange(handler) {
-    this.database_.onversionchange = handler;
+    this._database.onversionchange = handler;
   }
 
   /**
    * Closes this database connection.
    */
   close() {
-    this.database_.close();
+    this._database.close();
   }
 }
 
@@ -128,7 +128,7 @@ export default class Database extends BaseDatabase {
    */
   transaction(scope, mode = 'readonly') {
     return new Transaction(
-      this.database_.transaction(scope, mode),
+      this._database.transaction(scope, mode),
       this
     );
   }
@@ -147,7 +147,7 @@ export class VersionChangeDatabase extends BaseDatabase {
     super(database);
 
     /** @const */
-    this.transaction_ = transaction;
+    this._transaction = transaction;
   }
 
   /**
@@ -161,10 +161,10 @@ export class VersionChangeDatabase extends BaseDatabase {
    * @return {!ObjectStore} A wrapped IDBObjectStore.
    */
   createObjectStore(name, params = {}) {
-    const store = this.database_.createObjectStore(name, params);
-    this.objectStoreNames = this.database_.objectStoreNames;
-    this.transaction_.objectStoreNames = this.objectStoreNames;
-    return new ObjectStore(store, this.transaction_);
+    const store = this._database.createObjectStore(name, params);
+    this.objectStoreNames = this._database.objectStoreNames;
+    this._transaction.objectStoreNames = this.objectStoreNames;
+    return new ObjectStore(store, this._transaction);
   }
 
   /**
@@ -174,8 +174,8 @@ export class VersionChangeDatabase extends BaseDatabase {
    * @param {string} name
    */
   deleteObjectStore(name) {
-    this.database_.deleteObjectStore(name);
-    this.objectStoreNames = this.database_.objectStoreNames;
-    this.transaction_.objectStoreNames = this.objectStoreNames;
+    this._database.deleteObjectStore(name);
+    this.objectStoreNames = this._database.objectStoreNames;
+    this._transaction.objectStoreNames = this.objectStoreNames;
   }
 }

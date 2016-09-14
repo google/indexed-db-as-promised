@@ -32,7 +32,7 @@ export default class Request {
    */
   constructor(request, transaction = null, source = null) {
     /** @const */
-    this.request_ = request;
+    this._request = request;
 
     /** @const */
     this.transaction = transaction;
@@ -46,7 +46,7 @@ export default class Request {
      * @const
      * @type {!SyncPromise<T>}
      */
-    this.promise_ = new SyncPromise((resolve, reject) => {
+    this._promise = new SyncPromise((resolve, reject) => {
       if (request.readyState === 'done') {
         if (request.error) {
           reject(request.error);
@@ -67,7 +67,7 @@ export default class Request {
    * @return {!IDBRequestReadyState}
    */
   get readyState() {
-    return this.request_.readyState;
+    return this._request.readyState;
   }
 
   /**
@@ -94,6 +94,6 @@ export default class Request {
    * @template R
    */
   then(onFulfilled, onRejected) {
-    return this.promise_.then(onFulfilled, onRejected);
+    return this._promise.then(onFulfilled, onRejected);
   }
 }

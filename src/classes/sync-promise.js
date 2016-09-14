@@ -20,8 +20,8 @@ export default class SyncPromise {
       throw new TypeError('Must pass resolver function');
     }
 
-    this.state_ = PendingPromise;
-    this.value_ = [];
+    this._state = PendingPromise;
+    this._value = [];
 
     doResolve(
       this,
@@ -34,7 +34,7 @@ export default class SyncPromise {
   then(onFulfilled, onRejected) {
     onFulfilled = isFunction(onFulfilled) ? onFulfilled : returner;
     onRejected = isFunction(onRejected) ? onRejected : thrower;
-    return this.state_(this.value_, onFulfilled, onRejected);
+    return this._state(this._value, onFulfilled, onRejected);
   }
 
   catch(onRejected) {
@@ -89,7 +89,7 @@ function PromiseState(action) {
       deferred = Deferred();
     }
     action(value, onFulfilled, onRejected, deferred);
-    return deferred.promise;
+    return deferred._promise;
   }
 }
 
@@ -102,26 +102,30 @@ const RejectedPromise = PromiseState((reason, _, onRejected, deferred) => {
 });
 
 const PendingPromise = PromiseState((queue, onFulfilled, onRejected, deferred) => {
-  queue.push({ deferred, onFulfilled, onRejected });
+  queue.push({
+    _deferred: deferred,
+    _onFulfilled: onFulfilled,
+    _onRejected: onRejected,
+  });
 });
 
 function Deferred() {
   const deferred = {};
-  deferred.promise = new SyncPromise((resolve, reject) => {
-    deferred.resolve = resolve;
-    deferred.reject = reject;
+  deferred._promise = new SyncPromise((resolve, reject) => {
+    deferred._resolve = resolve;
+    deferred._reject = reject;
   });
   return deferred;
 }
 
 function adopt(promise, state, value) {
-  const queue = promise.value_;
-  promise.state_ = state;
-  promise.value_ = value;
+  const queue = promise._value;
+  promise._state = state;
+  promise._value = value;
 
   for (let i = 0; i < queue.length; i++) {
-    const { onFulfilled, onRejected, deferred } = queue[i];
-    state(value, onFulfilled, onRejected, deferred);
+    const { _deferred, _onFulfilled, _onRejected } = queue[i];
+    state(value, _onFulfilled, _onRejected, _deferred);
   }
 }
 
@@ -154,12 +158,12 @@ function each(collection, iterator) {
 }
 
 function tryCatchDeferred(deferred, fn, arg) {
-  const { promise, resolve, reject } = deferred;
+  const { _promise, _resolve, _reject } = deferred;
   try {
     const result = fn(arg);
-    doResolve(promise, resolve, reject, result, result);
+    doResolve(_promise, _resolve, _reject, result, result);
   } catch (e) {
-    reject(e);
+    _reject(e);
   }
 }
 

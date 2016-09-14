@@ -29,7 +29,7 @@ export default class ObjectStore {
    */
   constructor(store, transaction) {
     /** @const */
-    this.store_ = store;
+    this._store = store;
 
     /** @const */
     this.transaction = transaction;
@@ -68,7 +68,7 @@ export default class ObjectStore {
    * @return {!Request<IDBKeyType>} A wrapped IDBRequest to add the record.
    */
   add(record, key = undefined) {
-    return new Request(this.store_.add(record, key), this.transaction, this);
+    return new Request(this._store.add(record, key), this.transaction, this);
   }
 
   /**
@@ -77,7 +77,7 @@ export default class ObjectStore {
    * @return {!Request<undefined>} A wrapped IDBRequest to clear all records.
    */
   clear() {
-    return new Request(this.store_.clear(), this.transaction, this);
+    return new Request(this._store.clear(), this.transaction, this);
   }
 
   /**
@@ -90,7 +90,7 @@ export default class ObjectStore {
    */
   count(query = null) {
     return new Request(
-      query == null ? this.store_.count() : this.store_.count(query),
+      query == null ? this._store.count() : this._store.count(query),
       this.transaction,
       this
     );
@@ -107,8 +107,8 @@ export default class ObjectStore {
    * @return {!Index} A wrapped IDBIndex
    */
   createIndex(name, keyPath, params = {}) {
-    const index = this.store_.createIndex(name, keyPath, params);
-    this.indexNames = this.store_.indexNames;
+    const index = this._store.createIndex(name, keyPath, params);
+    this.indexNames = this._store.indexNames;
     return new Index(index, this.transaction, this);
   }
 
@@ -121,7 +121,7 @@ export default class ObjectStore {
    * @return {!Request<undefined>} A wrapped IDBRequest to delete the record.
    */
   delete(key) {
-    return new Request(this.store_.delete(key), this.transaction, this);
+    return new Request(this._store.delete(key), this.transaction, this);
   }
 
   /**
@@ -131,8 +131,8 @@ export default class ObjectStore {
    * @param {string} name
    */
   deleteIndex(name) {
-    this.store_.deleteIndex(name);
-    this.indexNames = this.store_.indexNames;
+    this._store.deleteIndex(name);
+    this.indexNames = this._store.indexNames;
   }
 
   /**
@@ -144,7 +144,7 @@ export default class ObjectStore {
    * @return {!Request<*>}
    */
   get(key) {
-    return new Request(this.store_.get(key), this.transaction, this);
+    return new Request(this._store.get(key), this.transaction, this);
   }
 
   /**
@@ -158,7 +158,7 @@ export default class ObjectStore {
    * @return {!Request<!Array<*>>}
    */
   getAll(query = null, count = Infinity) {
-    return new Request(this.store_.getAll(query, count), this.transaction, this);
+    return new Request(this._store.getAll(query, count), this.transaction, this);
   }
 
   /**
@@ -171,7 +171,7 @@ export default class ObjectStore {
    * @return {!Request<!Array<*>>}
    */
   getAllKeys(query = null, count = Infinity) {
-    return new Request(this.store_.getAllKeys(query, count), this.transaction, this);
+    return new Request(this._store.getAllKeys(query, count), this.transaction, this);
   }
 
   /**
@@ -180,7 +180,7 @@ export default class ObjectStore {
    * @return {!Index} A wrapped IDBIndex
    */
   index(name) {
-    return new Index(this.store_.index(name), this.transaction, this);
+    return new Index(this._store.index(name), this.transaction, this);
   }
 
   /**
@@ -192,7 +192,7 @@ export default class ObjectStore {
    * @return {!CursorRequest} A wrapper around an iterating IDBCursor.
    */
   openCursor(query = null, direction = 'next') {
-    return new CursorRequest(this.store_.openCursor(query, direction), this.transaction, this);
+    return new CursorRequest(this._store.openCursor(query, direction), this.transaction, this);
   }
 
   /**
@@ -204,7 +204,7 @@ export default class ObjectStore {
    * @return {!CursorRequest} A wrapper around an iterating IDBCursor.
    */
   openKeyCursor(query = null, direction = 'next') {
-    return new CursorRequest(this.store_.openKeyCursor(query, direction), this.transaction, this);
+    return new CursorRequest(this._store.openKeyCursor(query, direction), this.transaction, this);
   }
 
   /**
@@ -216,7 +216,7 @@ export default class ObjectStore {
    *     record.
    */
   put(record, key = undefined) {
-    return new Request(this.store_.put(record, key), this.transaction, this);
+    return new Request(this._store.put(record, key), this.transaction, this);
   }
 }
 
@@ -233,8 +233,8 @@ export class VersionChangeObjectStore extends ObjectStore {
    * @return {!Index} A wrapped IDBIndex
    */
   createIndex(name, keyPath, params = {}) {
-    const index = this.store_.createIndex(name, keyPath, params);
-    this.indexNames = this.store_.indexNames;
+    const index = this._store.createIndex(name, keyPath, params);
+    this.indexNames = this._store.indexNames;
     return new Index(index, this.transaction, this);
   }
 
@@ -245,7 +245,7 @@ export class VersionChangeObjectStore extends ObjectStore {
    * @param {string} name
    */
   deleteIndex(name) {
-    this.store_.deleteIndex(name);
-    this.indexNames = this.store_.indexNames;
+    this._store.deleteIndex(name);
+    this.indexNames = this._store.indexNames;
   }
 }

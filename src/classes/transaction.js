@@ -28,7 +28,7 @@ class BaseTransaction {
    */
   constructor(transaction) {
     /** @const */
-    this.transaction_ = transaction;
+    this._transaction = transaction;
 
     /**
      * The access mode the transaction runs in.
@@ -46,7 +46,7 @@ class BaseTransaction {
    * @return {EventHandler}
    */
   get onabort() {
-    return this.transaction_.onabort;
+    return this._transaction.onabort;
   }
 
   /**
@@ -56,14 +56,14 @@ class BaseTransaction {
    * @param {EventHandler} handler
    */
   set onabort(handler) {
-    this.transaction_.onabort = handler;
+    this._transaction.onabort = handler;
   }
 
   /**
    * Aborts the transaction, rolling back any changes that have happened.
    */
   abort() {
-    this.transaction_.abort();
+    this._transaction.abort();
   }
 }
 
@@ -93,7 +93,7 @@ export default class Transaction extends BaseTransaction {
      * done. Any attempts to access objectStores or double-run will result in
      * errors.
      */
-    this.ran_ = this.mode === 'versionchange';
+    this._ran = this.mode === 'versionchange';
 
     /**
      * A promise that will only resolve when the transaction has finished all
@@ -102,9 +102,9 @@ export default class Transaction extends BaseTransaction {
      * @const
      * @type {!SyncPromise<undefined>}
      **/
-    this.promise_ = new SyncPromise((resolve, reject) => {
+    this._promise = new SyncPromise((resolve, reject) => {
       transaction.oncomplete = () => {
-        this.ran_ = true;
+        this._ran = true;
         resolve();
       };
       transaction.onerror = rejectWithError(reject);
@@ -120,10 +120,10 @@ export default class Transaction extends BaseTransaction {
    *     `versionchange`.
    */
   objectStore(name) {
-    if (!this.ran_) {
+    if (!this._ran) {
       throw new Error('Cannot access objectStore outside of the #run block.');
     }
-    return new ObjectStore(this.transaction_.objectStore(name), this);
+    return new ObjectStore(this._transaction.objectStore(name), this);
   }
 
   /**
@@ -140,17 +140,17 @@ export default class Transaction extends BaseTransaction {
    * @template T
    */
   run(callback) {
-    if (this.ran_) {
+    if (this._ran) {
       throw new Error('Transaction has already run.');
     }
-    this.ran_ = true;
+    this._ran = true;
 
     return new SyncPromise((resolve) => {
       resolve(callback(this));
     }).then((result) => {
       // Wait until the transaction completes, but return the callback's
       // resolved result.
-      return this.promise_.then(() => result);
+      return this._promise.then(() => result);
     }, (error) => {
       // When an error is thrown, abort the transaction.
       this.abort();
@@ -186,6 +186,6 @@ export class VersionChangeTransaction extends BaseTransaction {
    * @return {!VersionChangeObjectStore} A wrapped IDBObjectStore.
    */
   objectStore(name) {
-    return new VersionChangeObjectStore(this.transaction_.objectStore(name), this);
+    return new VersionChangeObjectStore(this._transaction.objectStore(name), this);
   }
 }
