@@ -33,43 +33,31 @@ export default class ObjectStore {
 
     /** @const */
     this.transaction = transaction;
-  }
 
-  /**
-   * Whether the objectStore uses an auto incrementing key if a key is not
-   * provided.
-   *
-   * @return {boolean}
-   */
-  get autoIncrement() {
-    return this.store_.autoIncrement;
-  }
+    /** @const {string} */
+    this.name = store.name;
 
-  /**
-   * The names of all the indexes on the objectStore.
-   *
-   * @return {!DOMStringList}
-   */
-  get indexNames() {
-    return this.store_.indexNames;
-  }
+    /**
+     * Whether the objectStore uses an auto incrementing key if a key is not
+     * provided.
+     *
+     * @const {boolean}
+     */
+    this.autoIncrement = store.autoIncrement;
 
-  /**
-   * The key path of the records records in the objectStore.
-   *
-   * @return {*}
-   */
-  get keyPath() {
-    return this.store_.keyPath;
-  }
+    /**
+     * The names of all the indexes on the objectStore.
+     *
+     * @type {!DOMStringList}
+     */
+    this.indexNames = store.indexNames;
 
-  /**
-   * The objectStore's name.
-   *
-   * @return {string}
-   */
-  get name() {
-    return this.store_.name;
+    /**
+     * The key path of the records records in the objectStore.
+     *
+     * @const {*}
+     */
+    this.keyPath = store.keyPath;
   }
 
   /**
@@ -119,7 +107,9 @@ export default class ObjectStore {
    * @return {!Index} A wrapped IDBIndex
    */
   createIndex(name, keyPath, params = {}) {
-    return new Index(this.store_.createIndex(name, keyPath, params), this.transaction, this);
+    const index = this.store_.createIndex(name, keyPath, params);
+    this.indexNames = this.store_.indexNames;
+    return new Index(index, this.transaction, this);
   }
 
   /**
@@ -142,6 +132,7 @@ export default class ObjectStore {
    */
   deleteIndex(name) {
     this.store_.deleteIndex(name);
+    this.indexNames = this.store_.indexNames;
   }
 
   /**
