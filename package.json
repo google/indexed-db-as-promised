@@ -33,7 +33,6 @@
     "gulp-mocha": "^2.2.0",
     "gulp-sourcemaps": "^1.6.0",
     "mocha": "^2.3.4",
-    "modify-babel-preset": "^2.0.3",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-uglify": "^1.0.1",
     "rollup-stream": "^1.10.1",
