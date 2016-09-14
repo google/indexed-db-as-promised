@@ -27,33 +27,19 @@ export default class Database {
   constructor(database) {
     /** @const */
     this.database_ = database;
-  }
 
-  /**
-   * The database's name.
-   *
-   * @return {string}
-   */
-  get name() {
-    return this.database_.name;
-  }
+    /** @const {string} */
+    this.name = database.name;
 
-  /**
-   * The names of all the objectStores in the database.
-   *
-   * @return {!DOMStringList}
-   */
-  get objectStoreNames() {
-    return this.database_.objectStoreNames;
-  }
+   /** @const {number} */
+    this.version = database.version;
 
-  /**
-   * The current database version.
-   *
-   * @return {number}
-   */
-  get version() {
-    return this.database_.version;
+    /**
+     * The names of all the objectStores in the database.
+     *
+     * @type {!DOMStringList}
+     */
+    this.objectStoreNames = database.objectStoreNames;
   }
 
   /**
@@ -137,6 +123,7 @@ export default class Database {
    */
   createObjectStore(name, params = {}) {
     const store = this.database_.createObjectStore(name, params);
+    this.objectStoreNames = this.database_.objectStoreNames;
     return new ObjectStore(
       store,
       new Transaction(store.transaction, this)
@@ -151,6 +138,7 @@ export default class Database {
    */
   deleteObjectStore(name) {
     this.database_.deleteObjectStore(name);
+    this.objectStoreNames = this.database_.objectStoreNames;
   }
 
   /**
