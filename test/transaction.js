@@ -86,10 +86,25 @@ describe('Transaction', () => {
       });
 
       describe('when the scope has multiple records', () => {
-        it('returns the objectStore name in scope', () => {
+        it('returns the objectStore names in scope', () => {
           return db.transaction(['test', 'test2']).run((tx) => {
             expect(tx.objectStoreNames).to.deep.equal(['test', 'test2']);
           });
+        });
+      });
+    });
+
+    describe('during upgrade event', () => {
+      it('returns all objectStores', () => {
+        db.close();
+        return iDb.open('test', 2, {
+          upgrade(db, { transaction }) {
+            expect(transaction.objectStoreNames).to.deep.equal(['test', 'test2']);
+            db.deleteObjectStore('test');
+            expect(transaction.objectStoreNames).to.deep.equal(['test2']);
+            db.createObjectStore('test3');
+            expect(transaction.objectStoreNames).to.deep.equal(['test2', 'test3']);
+          }
         });
       });
     });
