@@ -50,15 +50,15 @@ let OpenCallbacks;
  * Transaction.
  *
  * @param {!Event} event The native version change event emitted.
- * @param {?Database} db The database whose version is changing.
+ * @param {?Transaction} transaction The versionchange transaction if the
+ *     version is changing.
  * @return {!VersionChangeEvent}
  */
-function versionChangeEvent(event, db = null) {
-  const transaction = event.target.transaction;
+function versionChangeEvent(event, transaction = null) {
   return {
     oldVersion: event.oldVersion,
     newVersion: event.newVersion,
-    transaction: transaction && new Transaction(transaction, db),
+    transaction,
   };
 }
 
@@ -96,12 +96,6 @@ const indexedDBP = {
   open(name, version = 1, { upgrade, blocked } = {}) {
     const request = indexedDB.open(name, version);
     const wrapped = new Request(request);
-    let db;
-
-    // A helper to avoid creating multiple wrapped Database instances.
-    function instance() {
-      return db || (db = new Database(request.result));
-    }
 
     /**
      * This is the wrapped Request's resolve function. We're wrapping it so
@@ -111,14 +105,20 @@ const indexedDBP = {
      */
     const resolve = request.onsuccess;
     request.onsuccess = () => {
-      resolve({ target: { result: instance() } });
+      resolve({ target: {
+        result: new Database(request.result),
+      } });
     };
 
     if (upgrade) {
       request.onupgradeneeded = (event) => {
-        upgrade(instance(), versionChangeEvent(event, db));
+        // TODO How is this working?!
+  const transaction = event.target.transaction;
+        const db = new Database(request.transaction.db);
+        upgrade(db, versionChangeEvent(event, db));
       };
     }
+
     if (blocked) {
       request.onblocked = (event) => {
         blocked(versionChangeEvent(event));
