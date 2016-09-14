@@ -51,45 +51,35 @@ class Cursor {
 
     /** @const */
     this.cursor_ = cursor;
-  }
 
-  /**
-   * Returns the direction of iteration for this cursor.
-   *
-   * @return {!Direction}
-   */
-  get direction() {
-    return this.cursor_.direction;
-  }
+    /**
+     * The direction of iteration for this cursor.
+     * @const {!Direction}
+     */
+    this.direction = cursor.direction;
 
-  /**
-   * The key of the record at the cursor's current position. If the source of
-   * he cursor is an Index, it is the value at `keyPath` of the Index.
-   * Otherwise, it is the primary key stored by the ObjectStore.
-   *
-   * @return {IDBKeyType}
-   */
-  get key() {
-    return this.cursor_.key;
-  }
+    /**
+     * The key of the record at the cursor's current position. If the source of
+     * he cursor is an Index, it is the value at `keyPath` of the Index.
+     * Otherwise, it is the primary key stored by the ObjectStore.
+     * @type {IDBKeyType}
+     */
+    this.key = null;
 
-  /**
-   * The primary key of the record at the cursor's current position in the
-   * ObjectStore.
-   *
-   * @return {IDBKeyType}
-   */
-  get primaryKey() {
-    return this.cursor_.primaryKey;
-  }
+    /**
+     * The primary key of the record at the cursor's current position in the
+     * ObjectStore.
+     *
+     * @type {IDBKeyType}
+     */
+    this.primaryKey = null;
 
-  /**
-   * The record at the cursor's current position.
-   *
-   * @return {*}
-   */
-  get value() {
-    return this.cursor_.value;
+    /**
+     * The record at the cursor's current position.
+     *
+     * @type {*}
+     */
+    this.value =  null;
   }
 
   /**
@@ -185,8 +175,13 @@ export default class CursorRequest {
     return this.promise_.then((result) => {
       const results = [];
       const request = this.cursorRequest_;
-      // Avoid creating an instance if the cursor is out of bounds.
-      const cursor = result && new Cursor(result, this.transaction, this.source);
+
+      // Avoid the rest if the cursor is out of bounds.
+      if (!result) {
+        return results;
+      }
+
+      const cursor = new Cursor(result, this.transaction, this.source);
 
       /**
        * The first step of the iteration process ensures that we wait until the
@@ -194,7 +189,7 @@ export default class CursorRequest {
        * This callback is passed as the resolver to SyncPromise's constructor.
        * @param {function(*=)} resolve The promise resolve function.
        */
-      const resolver = (resolve) => {
+      const iterate = (resolve) => {
         resolve(iterator(cursor));
       };
 
@@ -225,21 +220,24 @@ export default class CursorRequest {
        * A recursive callback that will continue to call `iterator` until there
        * is nothing left to iterate. Holy smokes, look at the recursion Batman!
        * @param {*|null} result
-       * @return {!SyncPromise<!Array<*>>|Array<*>}
+       * @return {!SyncPromise<!Array<*>>|!Array<*>}
        */
-      const iterate = (result) => {
+      const step = (result) => {
         // When the cursor finally reaches the end of its bounds, the Request
         // will resolve with `null`.
         if (!result) {
           return results;
         }
 
-        return new SyncPromise(resolver)
+        cursor.key = result.key;
+        cursor.primaryKey = result.primaryKey;
+        cursor.value = result.value;
+        return new SyncPromise(iterate)
           .then(pushAndMaybeAdvance)
-          .then(iterate);
+          .then(step);
       };
 
-      return iterate(result);
+      return step(result);
     });
   }
 
