@@ -124,7 +124,6 @@ export default class Database {
   createObjectStore(name, params = {}) {
     const store = this.database_.createObjectStore(name, params);
     this.objectStoreNames = this.database_.objectStoreNames;
-    this.transaction_.objectStoreNames = this.transaction_.objectStoreNames;
     return new ObjectStore(
       store,
       new Transaction(store.transaction, this)
@@ -140,7 +139,6 @@ export default class Database {
   deleteObjectStore(name) {
     this.database_.deleteObjectStore(name);
     this.objectStoreNames = this.database_.objectStoreNames;
-    this.transaction_.objectStoreNames = this.transaction_.objectStoreNames;
   }
 
   /**

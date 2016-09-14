@@ -112,10 +112,9 @@ const indexedDBP = {
 
     if (upgrade) {
       request.onupgradeneeded = (event) => {
-        // TODO How is this working?!
-  const transaction = event.target.transaction;
         const db = new Database(request.transaction.db);
-        upgrade(db, versionChangeEvent(event, db));
+        const transaction = new Transaction(event.target.transaction, db);
+        upgrade(db, versionChangeEvent(event, transaction));
       };
     }
 
