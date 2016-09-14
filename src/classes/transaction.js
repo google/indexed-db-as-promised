@@ -14,24 +14,21 @@
  * limitations under the License.
  */
 
-import ObjectStore from './object-store';
+import { VersionChangeDatabase } from './database';
+import ObjectStore, { VersionChangeObjectStore } from './object-store';
 import SyncPromise from './sync-promise';
 import { rejectWithError } from '../util';
 
 /**
  * A wrapper around IDBTransaction, which provides access to other wrapped APIs.
  */
-export default class Transaction {
+class BaseTransaction {
   /**
    * @param {!IDBTransaction} transaction
-   * @param {!Database} db The database that opened the transaction.
    */
-  constructor(transaction, db) {
+  constructor(transaction) {
     /** @const */
     this.transaction_ = transaction;
-
-    /** @const */
-    this.db = db;
 
     /**
      * The access mode the transaction runs in.
@@ -40,44 +37,6 @@ export default class Transaction {
      * @const {!IDBTransactionMode}
      */
     this.mode = transaction.mode;
-
-    /**
-     * Whether this transaction has run. We limit the transaction to only
-     * "running" once inside a `#run` callback to provide a clear indication
-     * that transactions **will** close if there is no work currently being
-     * done. Any attempts to access objectStores or double-run will result in
-     * errors.
-     *
-     * There _is_ a special case when the transaction is in `versionchange`
-     * mode, since this transaction is "run" automatically. In this case,
-     * access to objectStores is allowed outside the `#run` block.
-     * @type {boolean}
-     */
-    this.ran_ = this.mode === 'versionchange';
-
-    /**
-     * A promise that will only resolve when the transaction has finished all
-     * work.
-     *
-     * @const
-     * @type {!SyncPromise<undefined>}
-     **/
-    this.promise_ = new SyncPromise((resolve, reject) => {
-      transaction.oncomplete = () => {
-        this.ran_ = true;
-        resolve();
-      };
-      transaction.onerror = rejectWithError(reject);
-    });
-  }
-
-  /**
-   * The names of all the objectStores the transaction may access.
-   *
-   * @return {!DOMStringList}
-   */
-  get objectStoreNames() {
-    return transaction.objectStoreNames;
   }
 
   /**
@@ -106,6 +65,51 @@ export default class Transaction {
   abort() {
     this.transaction_.abort();
   }
+}
+
+
+export default class Transaction extends BaseTransaction {
+  /**
+   * @param {!IDBTransaction} transaction
+   * @param {!Database} db The database that opened the transaction.
+   */
+  constructor(transaction, db) {
+    super(transaction);
+
+    /** @const */
+    this.db = db;
+
+    /**
+     * The names of all the objectStores the transaction may access.
+     *
+     * @const {!DOMStringList}
+     */
+    this.objectStoreNames = transaction.objectStoreNames;
+
+    /**
+     * Whether this transaction has run. We limit the transaction to only
+     * "running" once inside a `#run` callback to provide a clear indication
+     * that transactions **will** close if there is no work currently being
+     * done. Any attempts to access objectStores or double-run will result in
+     * errors.
+     */
+    this.ran_ = this.mode === 'versionchange';
+
+    /**
+     * A promise that will only resolve when the transaction has finished all
+     * work.
+     *
+     * @const
+     * @type {!SyncPromise<undefined>}
+     **/
+    this.promise_ = new SyncPromise((resolve, reject) => {
+      transaction.oncomplete = () => {
+        this.ran_ = true;
+        resolve();
+      };
+      transaction.onerror = rejectWithError(reject);
+    });
+  }
 
   /**
    * Opens the objectStore `name`.
@@ -119,7 +123,6 @@ export default class Transaction {
     if (!this.ran_) {
       throw new Error('Cannot access objectStore outside of the #run block.');
     }
-
     return new ObjectStore(this.transaction_.objectStore(name), this);
   }
 
@@ -153,5 +156,36 @@ export default class Transaction {
       this.abort();
       throw error;
     });
+  }
+}
+
+
+export class VersionChangeTransaction extends BaseTransaction {
+  /**
+   * @param {!IDBTransaction} transaction
+   */
+  constructor(transaction) {
+    super(transaction);
+
+    /** @const {!VersionChangeDatabase} */
+    this.db = new VersionChangeDatabase(transaction.db, this);
+
+    /**
+     * The names of all the objectStores the transaction may access.
+     *
+     * @type {!DOMStringList}
+     */
+    this.objectStoreNames = transaction.objectStoreNames;
+
+  }
+
+  /**
+   * Opens the objectStore `name`.
+   *
+   * @param {string} name
+   * @return {!VersionChangeObjectStore} A wrapped IDBObjectStore.
+   */
+  objectStore(name) {
+    return new VersionChangeObjectStore(this.transaction_.objectStore(name), this);
   }
 }

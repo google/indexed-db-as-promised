@@ -49,7 +49,7 @@ describe('Transaction', () => {
         return iDb.open('test', 2, {
           upgrade(db, { transaction }) {
             expect(transaction.mode).to.equal('versionchange');
-          }
+          },
         });
       });
     });
@@ -104,7 +104,7 @@ describe('Transaction', () => {
             expect(transaction.objectStoreNames).to.deep.equal(['test2']);
             db.createObjectStore('test3');
             expect(transaction.objectStoreNames).to.deep.equal(['test2', 'test3']);
-          }
+          },
         });
       });
     });
@@ -172,7 +172,7 @@ describe('Transaction', () => {
           upgrade(db, { transaction }) {
             const store = transaction.objectStore('test');
             expect(store.name).to.equal('test');
-          }
+          },
         });
       });
     });
@@ -231,7 +231,7 @@ describe('Transaction', () => {
           expect(() => {
             transaction.run();
           }).to.throw(Error);
-        }
+        },
       });
     });
   });

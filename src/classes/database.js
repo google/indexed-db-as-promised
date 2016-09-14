@@ -20,7 +20,7 @@ import Transaction from './transaction';
 /**
  * A wrapper around IDBDatabase, which provides access to other wrapped APIs.
  */
-export default class Database {
+class BaseDatabase {
   /**
    * @param {!IDBDatabase} database
    */
@@ -110,37 +110,10 @@ export default class Database {
   close() {
     this.database_.close();
   }
+}
 
-  /**
-   * Creates an objectStore. Note that this may only be called inside the
-   * `upgrade` handler provided to `IndexedDBP#open`.
-   *
-   * @param {string} name
-   * @param {IDBObjectStoreParameters=} Options to use when creating the
-   *     objectStore, such as `autoIncrement`, `keyPath`.
-   *     @see https://www.w3.org/TR/IndexedDB/#idl-def-IDBObjectStoreParameters
-   * @return {!ObjectStore} A wrapped IDBObjectStore.
-   */
-  createObjectStore(name, params = {}) {
-    const store = this.database_.createObjectStore(name, params);
-    this.objectStoreNames = this.database_.objectStoreNames;
-    return new ObjectStore(
-      store,
-      new Transaction(store.transaction, this)
-    );
-  }
 
-  /**
-   * Deletes the `name` objectStore. Note that this may only be called inside
-   * the `upgrade` handler provided to `IndexedDBP#open`.
-   *
-   * @param {string} name
-   */
-  deleteObjectStore(name) {
-    this.database_.deleteObjectStore(name);
-    this.objectStoreNames = this.database_.objectStoreNames;
-  }
-
+export default class Database extends BaseDatabase {
   /**
    * Opens a new transaction to read or read/write data to the specified
    * objectStores. Note that this may not be called inside the `upgrade`
@@ -158,5 +131,51 @@ export default class Database {
       this.database_.transaction(scope, mode),
       this
     );
+  }
+}
+
+
+/**
+ * A wrapper around IDBDatabase, which provides access to other wrapped APIs.
+ */
+export class VersionChangeDatabase extends BaseDatabase {
+  /**
+   * @param {!IDBDatabase} database
+   * @param {!VersionChangeTransaction} transaction
+   */
+  constructor(database, transaction) {
+    super(database);
+
+    /** @const */
+    this.transaction_ = transaction;
+  }
+
+  /**
+   * Creates an objectStore. Note that this may only be called inside the
+   * `upgrade` handler provided to `IndexedDBP#open`.
+   *
+   * @param {string} name
+   * @param {IDBObjectStoreParameters=} Options to use when creating the
+   *     objectStore, such as `autoIncrement`, `keyPath`.
+   *     @see https://www.w3.org/TR/IndexedDB/#idl-def-IDBObjectStoreParameters
+   * @return {!ObjectStore} A wrapped IDBObjectStore.
+   */
+  createObjectStore(name, params = {}) {
+    const store = this.database_.createObjectStore(name, params);
+    this.objectStoreNames = this.database_.objectStoreNames;
+    this.transaction_.objectStoreNames = this.objectStoreNames;
+    return new ObjectStore(store, this.transaction_);
+  }
+
+  /**
+   * Deletes the `name` objectStore. Note that this may only be called inside
+   * the `upgrade` handler provided to `IndexedDBP#open`.
+   *
+   * @param {string} name
+   */
+  deleteObjectStore(name) {
+    this.database_.deleteObjectStore(name);
+    this.objectStoreNames = this.database_.objectStoreNames;
+    this.transaction_.objectStoreNames = this.objectStoreNames;
   }
 }

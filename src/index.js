@@ -16,7 +16,7 @@
 
 import Request from './classes/request';
 import Database from './classes/database';
-import Transaction from './classes/transaction';
+import { VersionChangeTransaction } from './classes/transaction';
 import SyncPromise from './classes/sync-promise';
 
 
@@ -27,7 +27,7 @@ import SyncPromise from './classes/sync-promise';
  * @typedef {{
  *   oldVersion: number,
  *   newVersion: number,
- *   transaction: ?Transaction,
+ *   transaction: ?VersionChangeTransaction,
  * }}
  */
 let VersionChangeEvent;
@@ -35,8 +35,8 @@ let VersionChangeEvent;
 /**
  * An object which provides the `upgrade` and `blocked` callbacks to use when
  * upgrading the database's version. The `upgrade` callback's
- * `VersionChangeEvent` will contain a `Transaction` object, while the
- * `blocked` callback's will not.
+ * `VersionChangeEvent` will contain a `VersionChangeTransaction` object, while
+ * the `blocked` callback's will not.
  *
  * @typedef {{
  *   upgrade: ?function(!Database, !VersionChangeEvent),
@@ -50,8 +50,8 @@ let OpenCallbacks;
  * Transaction.
  *
  * @param {!Event} event The native version change event emitted.
- * @param {?Transaction} transaction The versionchange transaction if the
- *     version is changing.
+ * @param {?VersionChangeTransaction} transaction The versionchange transaction
+ *     if the version is changing.
  * @return {!VersionChangeEvent}
  */
 function versionChangeEvent(event, transaction = null) {
@@ -112,9 +112,8 @@ const indexedDBP = {
 
     if (upgrade) {
       request.onupgradeneeded = (event) => {
-        const db = new Database(request.transaction.db);
-        const transaction = new Transaction(event.target.transaction, db);
-        upgrade(db, versionChangeEvent(event, transaction));
+        const transaction = new VersionChangeTransaction(event.target.transaction);
+        upgrade(transaction.db, versionChangeEvent(event, transaction));
       };
     }
 

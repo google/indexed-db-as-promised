@@ -219,3 +219,33 @@ export default class ObjectStore {
     return new Request(this.store_.put(record, key), this.transaction, this);
   }
 }
+
+
+export class VersionChangeObjectStore extends ObjectStore {
+  /**
+   * Creates an index `name` on the objectStore.  Note that this may only be
+   * called inside the `upgrade` handler provided to `IndexedDBP#open`.
+   *
+   * @param {string} name
+   * @param {IDBIndexParameters=} Options to use when creating the index, such
+   *     as `multiEntry` and `unique`.
+   *     @see https://www.w3.org/TR/IndexedDB/#idl-def-IDBIndexParameters
+   * @return {!Index} A wrapped IDBIndex
+   */
+  createIndex(name, keyPath, params = {}) {
+    const index = this.store_.createIndex(name, keyPath, params);
+    this.indexNames = this.store_.indexNames;
+    return new Index(index, this.transaction, this);
+  }
+
+  /**
+   * Deletes the index `name` on the objectStore.  Note that this may only be
+   * called inside the `upgrade` handler provided to `IndexedDBP#open`.
+   *
+   * @param {string} name
+   */
+  deleteIndex(name) {
+    this.store_.deleteIndex(name);
+    this.indexNames = this.store_.indexNames;
+  }
+}

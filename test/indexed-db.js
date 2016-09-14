@@ -50,24 +50,6 @@ describe('IndexedDB', () => {
         return upgrade;
       });
 
-      it('passes eventual Database instance', () => {
-        let resolve;
-        const upgrade = new Promise((r) => {
-          resolve = r;
-        });
-
-        return Promise.all([
-          iDb.open('test', 1, {
-            upgrade(db) {
-              resolve(db);
-            },
-          }),
-          upgrade,
-        ]).then(([db, upgradeDb]) => {
-          expect(db).to.equal(upgradeDb);
-        });
-      });
-
       it('passes event data', () => {
         let resolve;
         const upgrade = new Promise((r) => {
