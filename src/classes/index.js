@@ -35,44 +35,31 @@ export default class Index {
 
     /** @const */
     this.objectStore = objectStore;
-  }
 
-  /**
-   * The key path that populates records into the index.
-   *
-   * @return {*}
-   */
-  get keyPath() {
-    return this.index_.keyPath;
-  }
+    /** @const {string} */
+    this.name = index.name;
 
-  /**
-   * Whether there will be multiple entries for a record when the keyPath is an
-   * array. When `multiEntry` is `true` there is one record for every record in
-   * `keyPath`, when false there is only one record for the entire `keyPath`.
-   *
-   * @return {boolean}
-   */
-  get multiEntry() {
-    return this.index_.multiEntry;
-  }
+    /**
+     * The key path that populates records into the index.
+     * @const {*}
+     **/
+    this.keyPath = index.keyPath;
 
-  /**
-   * The index's name.
-   *
-   * @return {string}
-   */
-  get name() {
-    return this.index_.name;
-  }
+    /**
+     * Whether there will be multiple entries for a record when the keyPath is an
+     * array. When `multiEntry` is `true` there is one record for every record in
+     * `keyPath`, when false there is only one record for the entire `keyPath`.
+     *
+     * @const {boolean}
+     */
+    this.multiEntry = index.multiEntry;
 
-  /**
-   * Whether the index limits itself to unique keys only.
-   *
-   * @return {boolean}
-   */
-  get unique() {
-    return this.index_.unique;
+    /**
+     * Whether the index limits itself to unique keys only.
+     *
+     * @const {boolean}
+     */
+    this.unique = index.unique;
   }
 
   /**
