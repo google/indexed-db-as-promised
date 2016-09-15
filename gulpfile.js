@@ -15,6 +15,7 @@
  */
 
 const gulp = require('gulp');
+const alias = require('rollup-plugin-alias');
 const babel = require('rollup-plugin-babel');
 const buffer = require('vinyl-buffer');
 const eslint = require('gulp-eslint');
@@ -52,6 +53,9 @@ function bundle(options) {
     moduleName: 'IndexedDBP',
     sourceMap: true,
     plugins: [
+      alias({
+        '\0babelHelpers': __dirname + '/src/babel-helpers'
+      }),
       babel({
         exclude: 'node_modules/**',
       }),
@@ -74,7 +78,7 @@ function bundle(options) {
 gulp.task('build', () => {
   bundle({
     format: 'umd',
-    minify: true,
+    minify: false,
     output: 'indexed-db.js',
   });
 });
