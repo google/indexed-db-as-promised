@@ -2,11 +2,11 @@ export function classCallCheck() {}
 
 export function createClass(Constructor, protoProps) {
   const prototype = Constructor.prototype;
-  for (var i = 0; i < protoProps.length; i++) {
-    var descriptor = protoProps[i];
+  for (let i = 0; i < protoProps.length; i++) {
+    const descriptor = protoProps[i];
     descriptor.enumerable = false;
     descriptor.configurable = true;
-    if ("value" in descriptor) descriptor.writable = true;
+    if ('value' in descriptor) descriptor.writable = true;
     Object.defineProperty(prototype, descriptor.key, descriptor);
   }
 }
@@ -17,7 +17,7 @@ export function inherits(subClass, superClass) {
       configurable: true,
       writable: true,
       value: subClass,
-    }
+    },
   });
 }
 
@@ -27,6 +27,6 @@ export function possibleConstructorReturn(self, call) {
 
 export function interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
-    default: obj
+    default: obj,
   };
-};
+}

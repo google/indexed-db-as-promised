@@ -56,7 +56,7 @@ function bundle(options) {
     sourceMap: true,
     plugins: [
       alias({
-        '\0babelHelpers': __dirname + '/src/babel-helpers'
+        '\0babelHelpers': `${__dirname}/src/babel-helpers`,
       }),
       babel({
         exclude: 'node_modules/**',
@@ -67,7 +67,7 @@ function bundle(options) {
         },
         mangleProperties: {
           regex: /^_/,
-        }
+        },
       }) : {},
     ],
   }).pipe(source(options.output))

@@ -108,7 +108,7 @@ const indexedDBP = {
       resolve({
         target: {
           result: new Database(request.result),
-        }
+        },
       });
     };
 
