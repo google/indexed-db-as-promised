@@ -41,6 +41,14 @@ export default class Request {
     this.source = source;
 
     /**
+     * The current state of the request.
+     * @see https://www.w3.org/TR/IndexedDB/#idl-def-IDBRequestReadyState
+     *
+     * @type {!IDBRequestReadyState}
+     */
+    this.readyState = request.readyState;
+
+    /**
      * A Promise like that will resolve once the request finishes.
      *
      * @const
@@ -58,16 +66,11 @@ export default class Request {
         request.onerror = rejectWithError(reject);
       }
     });
-  }
 
-  /**
-   * The current state of the request.
-   * @see https://www.w3.org/TR/IndexedDB/#idl-def-IDBRequestReadyState
-   *
-   * @return {!IDBRequestReadyState}
-   */
-  get readyState() {
-    return this._request.readyState;
+    const updateReadyState = () => {
+      this.readyState = request.readyState;
+    };
+    this._promise.then(updateReadyState, updateReadyState);
   }
 
   /**
@@ -79,7 +82,7 @@ export default class Request {
    * @template R
    */
   catch(onRejected) {
-    return this.then(null, onRejected);
+    return this._promise.catch(onRejected);
   }
 
   /**
