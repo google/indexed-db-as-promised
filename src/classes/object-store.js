@@ -14,28 +14,24 @@
  * limitations under the License.
  */
 
+import DataSource from './data-source';
 import Request from './request';
-import CursorRequest from './cursor';
 import Index from './index';
 
 /**
  * A wrapper around IDBObjectStore, which provides a thin Promise-like API.
  */
-export default class ObjectStore {
+export default class ObjectStore extends DataSource {
   /**
    * @param {!IDBObjectStore} store
    * @param {!Transaction} transaction The transaction that is accessing the
    *     objectStore.
    */
   constructor(store, transaction) {
-    /** @const */
-    this._store = store;
+    super(store, transaction);
 
     /** @const */
     this.transaction = transaction;
-
-    /** @const {string} */
-    this.name = store.name;
 
     /**
      * Whether the objectStore uses an auto incrementing key if a key is not
@@ -51,13 +47,6 @@ export default class ObjectStore {
      * @type {!DOMStringList}
      */
     this.indexNames = store.indexNames;
-
-    /**
-     * The key path of the records records in the objectStore.
-     *
-     * @const {*}
-     */
-    this.keyPath = store.keyPath;
   }
 
   /**
@@ -68,7 +57,7 @@ export default class ObjectStore {
    * @return {!Request<IDBKeyType>} A wrapped IDBRequest to add the record.
    */
   add(record, key = undefined) {
-    return new Request(this._store.add(record, key), this.transaction, this);
+    return new Request(this._source.add(record, key), this.transaction, this);
   }
 
   /**
@@ -77,23 +66,7 @@ export default class ObjectStore {
    * @return {!Request<undefined>} A wrapped IDBRequest to clear all records.
    */
   clear() {
-    return new Request(this._store.clear(), this.transaction, this);
-  }
-
-  /**
-   * Counts the number of records in the objectStore. An optional query may be
-   * provided to limit the count to only records matching it.
-   *
-   * @param {*=} query The key of the records to count, or an IDBKeyRange of the
-   *     keys to count.
-   * @return {!Request<number>}
-   */
-  count(query = null) {
-    return new Request(
-      query == null ? this._store.count() : this._store.count(query),
-      this.transaction,
-      this
-    );
+    return new Request(this._source.clear(), this.transaction, this);
   }
 
   /**
@@ -105,46 +78,7 @@ export default class ObjectStore {
    * @return {!Request<undefined>} A wrapped IDBRequest to delete the record.
    */
   delete(key) {
-    return new Request(this._store.delete(key), this.transaction, this);
-  }
-
-  /**
-   * Gets the record in the objectStore that matches `key`, or the first record
-   * that matches the key range.
-   *
-   * @param {*=} key The key of the record to get, or an IDBKeyRange of the
-   *     keys.
-   * @return {!Request<*>}
-   */
-  get(key) {
-    return new Request(this._store.get(key), this.transaction, this);
-  }
-
-  /**
-   * Gets all the records in the objectStore that matches `key` or that match
-   * the key range. Note that not all implementations of IndexedDB provide
-   * `IDBObjectStore#getAll`.
-   *
-   * @param {*=} query The key of the records to get, or an IDBKeyRange of the
-   *     keys.
-   * @param {number=} count The maximum number of records to return.
-   * @return {!Request<!Array<*>>}
-   */
-  getAll(query = null, count = Infinity) {
-    return new Request(this._store.getAll(query, count), this.transaction, this);
-  }
-
-  /**
-   * Gets all the keys of the records in the objectStore that matches `key` or
-   * that match the key range. Note that not all implementations of IndexedDB
-   * provide `IDBObjectStore#getAllKeys`.
-   *
-   * @param {*=} query The key to get, or an IDBKeyRange of the keys.
-   * @param {number=} count The maximum number of keys to return.
-   * @return {!Request<!Array<*>>}
-   */
-  getAllKeys(query = null, count = Infinity) {
-    return new Request(this._store.getAllKeys(query, count), this.transaction, this);
+    return new Request(this._source.delete(key), this.transaction, this);
   }
 
   /**
@@ -153,31 +87,7 @@ export default class ObjectStore {
    * @return {!Index} A wrapped IDBIndex
    */
   index(name) {
-    return new Index(this._store.index(name), this.transaction, this);
-  }
-
-  /**
-   * Opens a cursor to iterate all records in the objectStore, or those matched
-   * by `query`.
-   *
-   * @param {*=} query The key to iterate, or an IDBKeyRange of the keys.
-   * @param {./cursor.Direction=} The direction to iterate in.
-   * @return {!CursorRequest} A wrapper around an iterating IDBCursor.
-   */
-  openCursor(query = null, direction = 'next') {
-    return new CursorRequest(this._store.openCursor(query, direction), this.transaction, this);
-  }
-
-  /**
-   * Opens a cursor to iterate all keys in the objectStore, or those matched by
-   * `query`.
-   *
-   * @param {*=} query The key to iterate, or an IDBKeyRange of the keys.
-   * @param {./cursor.Direction=} The direction to iterate in.
-   * @return {!CursorRequest} A wrapper around an iterating IDBCursor.
-   */
-  openKeyCursor(query = null, direction = 'next') {
-    return new CursorRequest(this._store.openKeyCursor(query, direction), this.transaction, this);
+    return new Index(this._source.index(name), this.transaction, this);
   }
 
   /**
@@ -189,7 +99,7 @@ export default class ObjectStore {
    *     record.
    */
   put(record, key = undefined) {
-    return new Request(this._store.put(record, key), this.transaction, this);
+    return new Request(this._source.put(record, key), this.transaction, this);
   }
 }
 
@@ -206,8 +116,8 @@ export class VersionChangeObjectStore extends ObjectStore {
    * @return {!Index} A wrapped IDBIndex
    */
   createIndex(name, keyPath, params = {}) {
-    const index = this._store.createIndex(name, keyPath, params);
-    this.indexNames = this._store.indexNames;
+    const index = this._source.createIndex(name, keyPath, params);
+    this.indexNames = this._source.indexNames;
     return new Index(index, this.transaction, this);
   }
 
@@ -218,7 +128,7 @@ export class VersionChangeObjectStore extends ObjectStore {
    * @param {string} name
    */
   deleteIndex(name) {
-    this._store.deleteIndex(name);
-    this.indexNames = this._store.indexNames;
+    this._source.deleteIndex(name);
+    this.indexNames = this._source.indexNames;
   }
 }
