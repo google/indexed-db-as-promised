@@ -37,6 +37,13 @@ class BaseTransaction {
      * @const {!IDBTransactionMode}
      */
     this.mode = transaction.mode;
+
+    /**
+     * The names of all the objectStores the transaction may access.
+     *
+     * @type {!DOMStringList}
+     */
+    this.objectStoreNames = transaction.objectStoreNames;
   }
 
   /**
@@ -78,13 +85,6 @@ export default class Transaction extends BaseTransaction {
 
     /** @const */
     this.db = db;
-
-    /**
-     * The names of all the objectStores the transaction may access.
-     *
-     * @const {!DOMStringList}
-     */
-    this.objectStoreNames = transaction.objectStoreNames;
 
     /**
      * Whether this transaction has run. We limit the transaction to only
@@ -169,14 +169,6 @@ export class VersionChangeTransaction extends BaseTransaction {
 
     /** @const {!VersionChangeDatabase} */
     this.db = new VersionChangeDatabase(transaction.db, this);
-
-    /**
-     * The names of all the objectStores the transaction may access.
-     *
-     * @type {!DOMStringList}
-     */
-    this.objectStoreNames = transaction.objectStoreNames;
-
   }
 
   /**

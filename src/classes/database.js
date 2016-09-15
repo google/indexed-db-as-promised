@@ -33,6 +33,13 @@ class BaseDatabase {
 
     /** @const {number} */
     this.version = database.version;
+
+    /**
+     * The names of all the objectStores in the database.
+     *
+     * @type {!DOMStringList}
+     */
+    this.objectStoreNames = database.objectStoreNames;
   }
 
   /**
@@ -112,13 +119,6 @@ export default class Database extends BaseDatabase {
    */
   constructor(database) {
     super(database)
-
-    /**
-     * The names of all the objectStores in the database.
-     *
-     * @type {!DOMStringList}
-     */
-    this.objectStoreNames = database.objectStoreNames;
   }
 
   /**
@@ -155,13 +155,6 @@ export class VersionChangeDatabase extends BaseDatabase {
 
     /** @const */
     this._transaction = transaction;
-
-    /**
-     * The names of all the objectStores in the database.
-     *
-     * @type {!DOMStringList}
-     */
-    this.objectStoreNames = database.objectStoreNames;
   }
 
   /**
