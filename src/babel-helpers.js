@@ -7,7 +7,7 @@ export function createClass(Constructor, protoProps) {
     descriptor.enumerable = false;
     descriptor.configurable = true;
     if ("value" in descriptor) descriptor.writable = true;
-    Object.defineProperty(protoProps, descriptor.key, descriptor);
+    Object.defineProperty(prototype, descriptor.key, descriptor);
   }
 }
 
@@ -21,4 +21,12 @@ export function inherits(subClass, superClass) {
   });
 }
 
-export function possibleConstructorReturn(self, call) {}
+export function possibleConstructorReturn(self, call) {
+  return call || self;
+}
+
+export function interopRequireDefault(obj) {
+  return obj && obj.__esModule ? obj : {
+    default: obj
+  };
+};

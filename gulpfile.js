@@ -29,8 +29,10 @@ const uglify = require('rollup-plugin-uglify');
 // For Mocha testing
 require('babel-register')({
   babelrc: false,
-  presets: ['es2015'],
+  presets: ['es2015-loose'],
+  plugins: ['external-helpers'],
 });
+global.babelHelpers = require('./src/babel-helpers');
 
 function watch(tasks) {
   return function watcher() {
