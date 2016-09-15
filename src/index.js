@@ -105,9 +105,11 @@ const indexedDBP = {
      */
     const resolve = request.onsuccess;
     request.onsuccess = () => {
-      resolve({ target: {
-        result: new Database(request.result),
-      } });
+      resolve({
+        target: {
+          result: new Database(request.result),
+        }
+      });
     };
 
     if (upgrade) {

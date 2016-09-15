@@ -33,13 +33,6 @@ class BaseDatabase {
 
     /** @const {number} */
     this.version = database.version;
-
-    /**
-     * The names of all the objectStores in the database.
-     *
-     * @type {!DOMStringList}
-     */
-    this.objectStoreNames = database.objectStoreNames;
   }
 
   /**
@@ -115,6 +108,20 @@ class BaseDatabase {
 
 export default class Database extends BaseDatabase {
   /**
+   * @param {!IDBDatabase} database
+   */
+  constructor(database) {
+    super(database)
+
+    /**
+     * The names of all the objectStores in the database.
+     *
+     * @type {!DOMStringList}
+     */
+    this.objectStoreNames = database.objectStoreNames;
+  }
+
+  /**
    * Opens a new transaction to read or read/write data to the specified
    * objectStores. Note that this may not be called inside the `upgrade`
    * handler provided to `IndexedDBP#open`.
@@ -148,6 +155,13 @@ export class VersionChangeDatabase extends BaseDatabase {
 
     /** @const */
     this._transaction = transaction;
+
+    /**
+     * The names of all the objectStores in the database.
+     *
+     * @type {!DOMStringList}
+     */
+    this.objectStoreNames = database.objectStoreNames;
   }
 
   /**
