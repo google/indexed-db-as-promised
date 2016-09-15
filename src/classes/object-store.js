@@ -97,22 +97,6 @@ export default class ObjectStore {
   }
 
   /**
-   * Creates an index `name` on the objectStore.  Note that this may only be
-   * called inside the `upgrade` handler provided to `IndexedDBP#open`.
-   *
-   * @param {string} name
-   * @param {IDBIndexParameters=} Options to use when creating the index, such
-   *     as `multiEntry` and `unique`.
-   *     @see https://www.w3.org/TR/IndexedDB/#idl-def-IDBIndexParameters
-   * @return {!Index} A wrapped IDBIndex
-   */
-  createIndex(name, keyPath, params = {}) {
-    const index = this._store.createIndex(name, keyPath, params);
-    this.indexNames = this._store.indexNames;
-    return new Index(index, this.transaction, this);
-  }
-
-  /**
    * Deletes the record that matches `key`, or the first record that matches
    * the key range.
    *
@@ -122,17 +106,6 @@ export default class ObjectStore {
    */
   delete(key) {
     return new Request(this._store.delete(key), this.transaction, this);
-  }
-
-  /**
-   * Deletes the index `name` on the objectStore.  Note that this may only be
-   * called inside the `upgrade` handler provided to `IndexedDBP#open`.
-   *
-   * @param {string} name
-   */
-  deleteIndex(name) {
-    this._store.deleteIndex(name);
-    this.indexNames = this._store.indexNames;
   }
 
   /**

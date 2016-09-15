@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import ObjectStore from './object-store';
+import ObjectStore, { VersionChangeObjectStore } from './object-store';
 import Transaction from './transaction';
 
 /**
@@ -171,7 +171,7 @@ export class VersionChangeDatabase extends BaseDatabase {
     const store = this._database.createObjectStore(name, params);
     this.objectStoreNames = this._database.objectStoreNames;
     this._transaction.objectStoreNames = this.objectStoreNames;
-    return new ObjectStore(store, this._transaction);
+    return new VersionChangeObjectStore(store, this._transaction);
   }
 
   /**
