@@ -174,7 +174,10 @@ function doResolve(promise, resolve, reject, value, context) {
       throw new TypeError('Cannot fulfill promise with itself');
     }
     let then;
-    if (isObject(value) && (then = value.then) && isFunction(then)) {
+    let isObj = isObject(value);
+    if (isObj && value instanceof SyncPromise) {
+      adopt(promise, value._state, value._value);
+    } else if (isObj && (then = value.then) && isFunction(then)) {
       then.call(context, (value) => {
         if (!called) {
           called = true;
