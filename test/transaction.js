@@ -138,10 +138,7 @@ describe('Transaction', () => {
       let fulfilled = false;
       let rejected = false;
       db.transaction('test', 'readwrite').run((tx) => {
-        const store = tx.objectStore('test');
-        store.add({}).then(() => {
-          tx.abort();
-        });
+        tx.abort();
       }).then(() => {
         fulfilled = true;
       }, () => {
@@ -232,6 +229,22 @@ describe('Transaction', () => {
             transaction.run();
           }).to.throw(Error);
         },
+      });
+    });
+
+    it('aborts if an error is thrown', () => {
+      return db.transaction('test', 'readwrite').run((tx) => {
+        let sync = true;
+        return tx.objectStore('test').add('test', 'test').then(() => {
+          throw new Error('why');
+        });
+      }).catch((error) => {
+        expect(error.message).to.have.string('why');
+        return db.transaction('test').run((tx) => {
+          return tx.objectStore('test').count();
+        }).then((count) => {
+          expect(count).to.equal(0);
+        });
       });
     });
   });
