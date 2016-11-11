@@ -111,21 +111,6 @@ export default class Transaction extends BaseTransaction {
   }
 
   /**
-   * Opens the objectStore `name`.
-   *
-   * @param {string} name
-   * @return {!ObjectStore} A wrapped IDBObjectStore.
-   * @throws {Error} If attempting to access the objectStore outside of the ru     block. An exception is made if the transaction is the automatically run
-   *     `versionchange`.
-   */
-  objectStore(name) {
-    if (!this._ran) {
-      throw new Error('Cannot access objectStore outside of the #run block.');
-    }
-    return new ObjectStore(this._transaction.objectStore(name), this);
-  }
-
-  /**
    * Opens a "run" block, allowing access to the transaction's objectStores.
    * The Promise-like returned will wait for both the transaction to complete
    * and the `callback`'s result before resolving with the result.
@@ -145,7 +130,8 @@ export default class Transaction extends BaseTransaction {
     this._ran = true;
 
     return new SyncPromise((resolve) => {
-      resolve(callback(this));
+      const run = new RunningTransaction(this._transaction, this.db);
+      resolve(callback(run));
     }).then((result) => {
       // Wait until the transaction completes, but return the callback's
       // resolved result.
@@ -155,6 +141,23 @@ export default class Transaction extends BaseTransaction {
       this.abort();
       throw error;
     });
+  }
+}
+
+class RunningTransaction extends BaseTransaction {
+  /**
+   * @param {!IDBTransaction} transaction
+   * @param {!Database} db The database that opened the transaction.
+   */
+  constructor(transaction, db) {
+    super(transaction);
+
+    /** @const */
+    this.db = db;
+  }
+
+  objectStore(name) {
+    return new ObjectStore(this._transaction.objectStore(name), this);
   }
 }
 
