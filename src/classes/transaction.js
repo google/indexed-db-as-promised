@@ -90,10 +90,9 @@ export default class Transaction extends BaseTransaction {
      * Whether this transaction has run. We limit the transaction to only
      * "running" once inside a `#run` callback to provide a clear indication
      * that transactions **will** close if there is no work currently being
-     * done. Any attempts to access objectStores or double-run will result in
-     * errors.
+     * done.
      */
-    this._ran = this.mode === 'versionchange';
+    this._ran = false;
 
     /**
      * A promise that will only resolve when the transaction has finished all
