@@ -54,10 +54,10 @@ let OpenCallbacks;
  *     if the version is changing.
  * @return {!VersionChangeEvent}
  */
-function versionChangeEvent(event, transaction = null) {
+function versionChangeEvent({ oldVersion, newVersion }, transaction = null) {
   return {
-    oldVersion: event.oldVersion,
-    newVersion: event.newVersion,
+    oldVersion,
+    newVersion,
     transaction,
   };
 }
@@ -94,38 +94,25 @@ const indexedDBP = {
    * @return {!Request<IDBDatabase>} A wrapped IDBRequest to open the database.
    */
   open(name, version = 1, { upgrade, blocked } = {}) {
-    const request = indexedDB.open(name, version);
-    const wrapped = new Request(request);
-
-    /**
-     * This is the wrapped Request's resolve function. We're wrapping it so
-     * that the request resolves with our wrapped Database instance.
-     *
-     * @type {!function(*)}
-     */
-    const resolve = request.onsuccess;
-    request.onsuccess = () => {
-      resolve({
-        target: {
-          result: new Database(request.result),
-        },
-      });
-    };
+    const open = indexedDB.open(name, version);
+    const request = new Request(open);
 
     if (upgrade) {
-      request.onupgradeneeded = (event) => {
+      open.onupgradeneeded = (event) => {
         const transaction = new VersionChangeTransaction(event.target.transaction);
         upgrade(transaction.db, versionChangeEvent(event, transaction));
       };
     }
 
     if (blocked) {
-      request.onblocked = (event) => {
+      open.onblocked = (event) => {
         blocked(versionChangeEvent(event));
       };
     }
 
-    return wrapped;
+    return request.then((database) => {
+      return new Database(database);
+    });
   },
 };
 
