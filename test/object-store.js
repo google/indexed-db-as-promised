@@ -82,7 +82,7 @@ describe('ObjectStore', () => {
       });
     });
 
-    xit('has a transaction during upgrade events', () => {
+    it('has a transaction during upgrade events', () => {
       db.close();
       return iDb.open('test', 2, {
         upgrade(db, { transaction }) {
