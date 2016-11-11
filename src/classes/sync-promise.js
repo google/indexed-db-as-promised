@@ -55,22 +55,22 @@ export default class SyncPromise {
 
   static all(promises) {
     return new SyncPromise((resolve, reject) => {
-      let length = promises.length;
-      const values = new Array(length);
+      let count = promises.length;
+      const values = new Array(count);
 
-      if (length == 0) {
+      if (count == 0) {
         resolve(values);
         return;
       }
 
-      each(promises, (promise, index) => {
+      for (let i = 0; i < promises.length; i++) {
         SyncPromise.resolve(promise).then((value) => {
-          values[index] = value;
-          if (--length == 0) {
+          values[i] = value;
+          if (--count == 0) {
             resolve(values);
           }
         }, reject);
-      });
+      }
     });
   }
 
@@ -149,12 +149,6 @@ function isFunction(fn) {
 
 function isObject(obj) {
   return obj == Object(obj);
-}
-
-function each(collection, iterator) {
-  for (let i = 0; i < collection.length; i++) {
-    iterator(collection[i], i);
-  }
 }
 
 function tryCatchDeferred(deferred, fn, arg) {
