@@ -1,4 +1,4 @@
-# indexed-db-as-promised [![Build Status](https://travis-ci.org/jridgewell/indexed-db-as-promised.svg)](https://travis-ci.org/jridgewell/indexed-db-as-promised)
+# indexed-db-as-promised [![Build Status](https://travis-ci.org/google/indexed-db-as-promised.svg)](https://travis-ci.org/google/indexed-db-as-promised)
 [![npm version](https://badge.fury.io/js/indexed-db-as-promised.svg)](http://badge.fury.io/js/indexed-db-as-promised)
 
 A thin wrapper around IndexedDB, making it much more pleasant to use by
