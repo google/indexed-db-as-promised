@@ -18,13 +18,19 @@ const gulp = require('gulp');
 const alias = require('rollup-plugin-alias');
 const babel = require('rollup-plugin-babel');
 const buffer = require('vinyl-buffer');
+const escapeRegExp = require('lodash.escaperegexp');
 const eslint = require('gulp-eslint');
+const license = require('./conf/license-check');
 const mocha = require('gulp-mocha');
+const replace = require('rollup-plugin-replace');
 const rollup = require('rollup-stream');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const touch = require('touch');
 const uglify = require('rollup-plugin-uglify');
+
+const licenseHeader = require('fs')
+  .readFileSync('./conf/license_header.txt', 'utf8');
 
 // For Mocha testing
 require('babel-register')({
@@ -54,6 +60,7 @@ function bundle(options) {
     format: options.format,
     moduleName: 'IndexedDBP',
     sourceMap: true,
+    banner: licenseHeader,
     plugins: [
       alias({
         '\0babelHelpers': `${__dirname}/src/babel-helpers`,
@@ -61,9 +68,15 @@ function bundle(options) {
       babel({
         exclude: 'node_modules/**',
       }),
+      replace({
+        [escapeRegExp(licenseHeader)]: '',
+      }),
       options.minify ? uglify({
         compress: {
           keep_fargs: false,
+        },
+        output: {
+          comments: /Copyright/,
         },
         mangleProperties: {
           regex: /^_/,
@@ -115,9 +128,14 @@ gulp.task('lint', () => {
     .pipe(eslint.failAfterError());
 });
 
+gulp.task('license', function () {
+  return gulp.src(['**/*.js', '!node_modules/**'])
+    .pipe(license());
+});
+
 gulp.task('test-watch', watch('test'));
 gulp.task('lint-watch', watch('lint'));
 
 gulp.task('compile', ['build', 'build-cjs', 'minify']);
 
-gulp.task('default', ['test', 'lint', 'compile']);
+gulp.task('default', ['test', 'lint', 'license', 'compile']);
