@@ -5,7 +5,10 @@
   "description": "A thin Promise-like wrapper around IndexedDB",
   "main": "lib/index.js",
   "jsnext:main": "src/index.js",
-  "files": ["lib", "src"],
+  "files": [
+    "lib",
+    "src"
+  ],
   "keywords": [
     "indexed",
     "db",
@@ -42,6 +45,7 @@
     "rollup-plugin-replace": "^1.1.1",
     "rollup-plugin-uglify": "^1.0.1",
     "rollup-stream": "^1.10.1",
+    "run-sequence": "^1.2.2",
     "through2": "^2.0.1",
     "touch": "^1.0.0",
     "vinyl-buffer": "^1.0.0",

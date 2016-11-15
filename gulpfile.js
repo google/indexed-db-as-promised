@@ -24,6 +24,7 @@ const license = require('./conf/license-check');
 const mocha = require('gulp-mocha');
 const replace = require('rollup-plugin-replace');
 const rollup = require('rollup-stream');
+const series = require('run-sequence');
 const source = require('vinyl-source-stream');
 const sourcemaps = require('gulp-sourcemaps');
 const touch = require('touch');
@@ -91,7 +92,7 @@ function bundle(options) {
 }
 
 gulp.task('build', () => {
-  bundle({
+  return bundle({
     format: 'umd',
     minify: false,
     output: 'indexed-db.js',
@@ -99,7 +100,7 @@ gulp.task('build', () => {
 });
 
 gulp.task('build-cjs', () => {
-  bundle({
+  return bundle({
     format: 'cjs',
     minify: false,
     output: 'index.js',
@@ -107,7 +108,7 @@ gulp.task('build-cjs', () => {
 });
 
 gulp.task('minify', () => {
-  bundle({
+  return bundle({
     format: 'umd',
     minify: true,
     output: 'indexed-db.min.js',
@@ -128,7 +129,7 @@ gulp.task('lint', () => {
     .pipe(eslint.failAfterError());
 });
 
-gulp.task('license', function () {
+gulp.task('license', () => {
   return gulp.src(['**/*.js', '!node_modules/**'])
     .pipe(license());
 });
@@ -138,4 +139,6 @@ gulp.task('lint-watch', watch('lint'));
 
 gulp.task('compile', ['build', 'build-cjs', 'minify']);
 
-gulp.task('default', ['test', 'lint', 'license', 'compile']);
+gulp.task('default', (cb) => {
+  return series('test', 'lint', 'compile', 'license', cb);
+});
