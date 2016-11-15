@@ -15,7 +15,6 @@
  */
 
 import SyncPromise from './sync-promise';
-import { resolveWithResult, rejectWithError } from '../util';
 
 /**
  * A wrapper around IDBRequest to give it a Promise-like API.
@@ -55,22 +54,23 @@ export default class Request {
      * @type {!SyncPromise<T>}
      */
     this._promise = new SyncPromise((resolve, reject) => {
-      if (request.readyState === 'done') {
+      if (this.readyState === 'done') {
         if (request.error) {
           reject(request.error);
         } else {
           resolve(request.result);
         }
       } else {
-        request.onsuccess = resolveWithResult(resolve);
-        request.onerror = rejectWithError(reject);
+        request.onsuccess = () => {
+          this.readyState = request.readyState;
+          resolve(request.result);
+        };
+        request.onerror = () => {
+          this.readyState = request.readyState;
+          reject(request.error);
+        };
       }
     });
-
-    const updateReadyState = () => {
-      this.readyState = request.readyState;
-    };
-    this._promise.then(updateReadyState, updateReadyState);
   }
 
   /**

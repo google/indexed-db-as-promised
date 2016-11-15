@@ -17,7 +17,6 @@
 import { VersionChangeDatabase } from './database';
 import ObjectStore, { VersionChangeObjectStore } from './object-store';
 import SyncPromise from './sync-promise';
-import { rejectWithError } from '../util';
 
 /**
  * A wrapper around IDBTransaction, which provides access to other wrapped APIs.
@@ -106,7 +105,7 @@ export default class Transaction extends BaseTransaction {
         this._ran = true;
         resolve();
       };
-      transaction.onerror = rejectWithError(reject);
+      transaction.onerror = (event) => reject(event.target.error);
     });
   }
 
