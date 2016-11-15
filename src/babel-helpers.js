@@ -20,7 +20,7 @@ export function createClass(Constructor, protoProps) {
   const prototype = Constructor.prototype;
   for (let i = 0; i < protoProps.length; i++) {
     const descriptor = protoProps[i];
-    descriptor.enumerable = descriptor.configurable = true;
+    descriptor.configurable = true;
     Object.defineProperty(prototype, descriptor.key, descriptor);
   }
 }
