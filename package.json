@@ -4,6 +4,8 @@
   "version": "0.1.0",
   "description": "A thin Promise-like wrapper around IndexedDB",
   "main": "lib/index.js",
+  "jsnext:main": "src/index.js",
+  "files": ["lib", "src"],
   "keywords": [
     "indexed",
     "db",
