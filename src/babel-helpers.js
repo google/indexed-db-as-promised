@@ -35,8 +35,8 @@ export function inherits(subClass, superClass) {
   });
 }
 
-export function possibleConstructorReturn(self, call) {
-  return call || self;
+export function possibleConstructorReturn(self) {
+  return self;
 }
 
 export function interopRequireDefault(obj) {
