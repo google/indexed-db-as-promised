@@ -234,7 +234,6 @@ describe('Transaction', () => {
 
     it('aborts if an error is thrown', () => {
       return db.transaction('test', 'readwrite').run((tx) => {
-        let sync = true;
         return tx.objectStore('test').add('test', 'test').then(() => {
           throw new Error('why');
         });
