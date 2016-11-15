@@ -14,8 +14,17 @@
  * limitations under the License.
  */
 
+/**
+ * Ensures that classes are called with the new operator.
+ * As we do not expose any classes, this is a useless check.
+ */
 export function classCallCheck() {}
 
+/**
+ * Sets up the instance methods on the Constructor.
+ * @param {!Function} Constructor
+ * @param {Array<!Object>} protoProps
+ */
 export function createClass(Constructor, protoProps) {
   const prototype = Constructor.prototype;
   for (let i = 0; i < protoProps.length; i++) {
@@ -25,6 +34,11 @@ export function createClass(Constructor, protoProps) {
   }
 }
 
+/**
+ * Sets up the class inheritance.
+ * @param {!Function} subClass
+ * @param {!Function} superClass
+ */
 export function inherits(subClass, superClass) {
   subClass.prototype = Object.create(superClass.prototype, {
     constructor: {
@@ -35,10 +49,23 @@ export function inherits(subClass, superClass) {
   });
 }
 
+/**
+ * Returns either the super call or this instance in the constructor of a
+ * subclass. As we don't explicitly return anything from one of our
+ * constructors, always return this instance.
+ * @param {!T} self
+ * @return {!T}
+ * @template T
+ */
 export function possibleConstructorReturn(self) {
   return self;
 }
 
+/**
+ * Imports an ES6 module, or a CJS module
+ * @param {!Object} obj
+ * @return {!Object}
+ */
 export function interopRequireDefault(obj) {
   return obj && obj.__esModule ? obj : {
     default: obj,
